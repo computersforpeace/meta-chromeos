@@ -6,6 +6,10 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 
 inherit chromeos_gn useradd
 
+SRC_URI += "\
+    file://0001-HACK-attestation-Handle-proto-printing-deprecated-fi.patch \
+"
+
 DEPENDS:append = " \
     abseil-cpp \
     attestation-client \

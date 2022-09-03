@@ -1,0 +1,26 @@
+From ccc7492e48c2902c477ac98a6bc05b182d675a99 Mon Sep 17 00:00:00 2001
+From: Brian Norris <briannorris@chromium.org>
+Date: Fri, 2 Sep 2022 18:03:40 -0700
+Subject: [PATCH] HACK: attestation: Handle proto-printing deprecated fields
+
+Change-Id: Ie9972f53c0db8369a1500870801401fca43541d7
+---
+ BUILD.gn | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/BUILD.gn b/BUILD.gn
+index a6b77737954d..02f836f9b8e3 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -104,6 +104,8 @@ source_set("proto_library") {
+     ":target_defaults",
+   ]
+   public_deps = [ ":print_proto_library" ]
++  # printer will generate code even for deprecated fields.
++  cflags_cc = [ "-Wno-error=deprecated-declarations" ]
+ }
+ 
+ # A library for common code.
+-- 
+2.37.2.789.g6183377224-goog
+
