@@ -572,20 +572,6 @@ by default), with many warnings similar to:
 |   ^
 ```
 
-### `chromeos-cr50-dev` optimization and `_FORTIFY_SOURCE`
-
-With `gcc-11.3` and `clang-14`, `chromeos-cr50-dev` is unabuildable (remember
-that `-Werror` is on by default):
-
-```console
-In file included from usb_updater2.c:8:
-In file included from <build>/tmp/work/cortexa57-chromeos-linux/chromeos-cr50-dev/0.0.1-r431/recipe-sysroot/usr/include/endian.h:21:
-<build>/tmp/work/cortexa57-chromeos-linux/chromeos-cr50-dev/0.0.1-r431/recipe-sysroot/usr/include/features.h:412:4: error: _FORTIFY_SOURCE requires compiling with optimization (-O) [-Werror,-W#warnings]
-#  warning _FORTIFY_SOURCE requires compiling with optimization (-O)
-```
-This is happening even though `-O2` and `-D_FORTIFY_SOURCE=2` are being passed
-in.
-
 ### `MACHINE`s and kernels
 
 During the proof-of-concept stage, builds were mostly performed for the
