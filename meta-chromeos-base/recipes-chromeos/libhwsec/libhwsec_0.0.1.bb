@@ -54,7 +54,7 @@ GN_ARGS += ' \
 '
 
 do_compile() {
-    ninja -C ${B}
+    ninja -C ${B} libhwsec:all
 }
 
 do_install() {
