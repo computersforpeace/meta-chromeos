@@ -10,6 +10,8 @@ S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
 PR = "r3280"
 
+FILES:${PN} += "/usr/share/policy"
+
 DEPENDS += "\
     chromeos-ec-headers \
     compiler-rt-sanitizers \
@@ -26,7 +28,10 @@ DEPENDS += "\
     tpm2 \
 "
 
-RDEPENDS:${PN} += "libhwsec-foundation"
+RDEPENDS:${PN} += "\
+    libhwsec-foundation \
+    libminijail \
+"
 
 GN_ARGS += 'platform_subdir="${BPN}"'
 
@@ -84,6 +89,66 @@ do_compile() {
 }
 
 do_install() {
-    :
+    install -D -m 0644 -t ${D}/etc/dbus-1/system.d/ ${S}/org.chromium.Trunks.conf
+
+    if [ ${@bb.utils.contains('PACKAGECONFIG', 'cr50_onboard', 'true', 'false', d)} ] ||
+       [ ${@bb.utils.contains('PACKAGECONFIG', 'ti50_onboard', 'true', 'false', d)} ]; then
+        install -D -m 0644 ${S}/trunksd.conf.cr50 ${D}/etc/init/trunksd.conf
+    else
+        install -D -m 0644 ${S}/trunksd.conf ${D}/etc/init/trunksd.conf
+    fi
+
+    if [ ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)} ]; then
+        sed -i '/env TPM_DYNAMIC=/s:=.*:=true:' \
+            "${D}/etc/init/trunksd.conf"
+    fi
+
+    install -D -t ${D}${sbindir} pinweaver_client
+    install -D -t ${D}${sbindir} trunks_client
+    install -D -t ${D}${sbindir} trunks_send
+    if [ ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)} ]; then
+        install -D ${S}/tpm_version ${D}${sbindir}/tpm2_version
+    else
+        install -D -t ${D}${sbindir} ${S}/tpm_version
+    fi
+    install -D -t ${D}${sbindir} trunksd
+    install -D lib/libtrunks.so ${D}${libdir}/libtrunks.so.${SO_VERSION}
+    ln -sf libtrunks.so.${SO_VERSION} ${D}${libdir}/libtrunks.so
+
+    # trunks_test library implements trunks mocks which are used by unittest
+    # and fuzzer.
+    # HACK: 'test' and 'fuzzer' aren't ready.
+    if false && ( [ ${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} ] ||
+                  [ ${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} ] ); then
+        install -D lib/libtrunks_test.a ${D}${libdir}/libtrunks_test.a
+        install -D lib/libtrunks_lib.a ${D}${libdir}/libtrunks_lib.a
+    fi
+
+    ARCH=${TARGET_ARCH}
+    [ "${ARCH}" = x86_64 ] && ARCH=amd64
+
+    if [ ${@bb.utils.contains('PACKAGECONFIG', 'pinweaver_csme', 'true', 'false', d)} ] &&
+       [ ${@bb.utils.contains('PACKAGECONFIG', 'generic_tpm2', 'true', 'false', d)} ]; then
+        install -D -m 0644 ${S}/csme/tpm_tunneld.conf ${D}/etc/init/tpm_tunneld.conf
+
+        install -D -t ${D}${sbindir} pinweaver_provision
+        install -D -t ${D}${sbindir} tpm_tunneld
+        install -D -m 0644 ${S}/csme/tpm_tunneld-seccomp-${ARCH}.policy ${D}/usr/share/policy/tpm_tunneld-seccomp.policy
+    fi
+
+    install -D -m 0644 ${S}/trunksd-seccomp-${ARCH}.policy ${D}/usr/share/policy/trunksd-seccomp.policy
+
+    install -D -m 0644 -t ${D}${includedir}/trunks/ ${S}/*.h
+    install -D -m 0644 -t ${D}${includedir}/trunks/ ./gen/include/trunks/*.h
+
+    install -D -m 0644 -t ${D}${includedir}/trunks/csme/ ${S}/csme/pinweaver_provision.h
+    install -D -m 0644 -t ${D}${includedir}/trunks/csme/ ${S}/csme/pinweaver_provision_impl.h
+
+    install -D -m 0644 -t ${D}${includedir}/proto/ ${S}/pinweaver.proto
+
+    install -D -m 0644 -t ${D}${includedir}/chromeos/dbus/trunks/ ${S}/trunks_interface.proto
+
+    install -d ${D}${libdir}/pkgconfig
+    install -m 0644 obj/trunks/libtrunks.pc ${D}${libdir}/pkgconfig/
 }
 
