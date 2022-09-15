@@ -17,6 +17,8 @@ DEPENDS:append = " \
     github.com-golang-protobuf-native \
     libbrillo \
     libchrome \
+    libhwsec \
+    libhwsec-foundation \
     libmetrics \
     libminijail \
     libtpm-manager-client \
