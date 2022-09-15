@@ -4,13 +4,17 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/libhws
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+inherit chromeos_gn python3native
 
 S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
 PR = "r430"
 
 DEPENDS:append = " abseil-cpp flatbuffers libbrillo libchrome libtpm-manager-client openssl protobuf system-api trunks"
+
+# Need native flatc.
+do_compile[depends] += "flatbuffers-native:do_populate_sysroot"
+do_compile[depends] += "python3-jinja2-native:do_populate_sysroot"
 
 GN_ARGS += 'platform_subdir="${BPN}"'
 
