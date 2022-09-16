@@ -89,8 +89,16 @@ do_compile() {
     ninja -C ${B}
 }
 
+PACKAGES += "libchaps"
+
 do_install() {
     install -d ${D}${includedir}/chaps/
     install -m 0644 ${S}/pkcs11/*.h ${D}${includedir}/chaps/
+
+    install -D lib/libchaps.so ${D}${libdir}/libchaps.so.${SO_VERSION}
+    ln -sf libchaps.so.${SO_VERSION} ${D}${libdir}/libchaps.so
 }
 
+FILES:${PN} = "${bindir}"
+FILES:libchaps = "${libdir}/*"
+PROVIDES += "libchaps"

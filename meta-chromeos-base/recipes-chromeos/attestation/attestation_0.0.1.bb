@@ -13,6 +13,7 @@ SRC_URI += "\
 DEPENDS:append = " \
     abseil-cpp \
     attestation-client \
+    libchaps \
     chromeos-dbus-bindings-native \
     github.com-golang-protobuf-native \
     libbrillo \
@@ -35,7 +36,7 @@ B = "${WORKDIR}/build"
 PR = "r3611"
 
 RDEPENDS:${PN} += " \
-    chaps \
+    libchaps \
     libhwsec \
     libhwsec-foundation \
     system-api \
