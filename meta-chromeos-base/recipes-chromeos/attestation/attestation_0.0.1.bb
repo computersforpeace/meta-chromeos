@@ -109,7 +109,7 @@ do_compile() {
 
 do_install() {
     install -d ${D}${includedir}/attestation/common
-    install -m 0644 ${S}/commmon/attestation_interface.h ${D}${includedir}/attestation/common/
+    install -m 0644 ${S}/common/attestation_interface.h ${D}${includedir}/attestation/common/
     install -m 0644 ${B}/gen/attestation/common/print_attestation_ca_proto.h ${D}${includedir}/attestation/common/
     install -m 0644 ${B}/gen/attestation/common/print_interface_proto.h ${D}${includedir}/attestation/common/
     install -m 0644 ${B}/gen/attestation/common/print_keystore_proto.h ${D}${includedir}/attestation/common/
