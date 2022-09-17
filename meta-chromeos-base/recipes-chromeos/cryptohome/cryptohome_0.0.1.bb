@@ -18,11 +18,12 @@ DEPENDS:append = " \
     cbor \
     chaps \
     chromeos-config-tools \
+    chromeos-dbus-bindings-native \
     cryptohome-client \
     e2fsprogs \
     ecryptfs-utils \
     flashmap \
-    flatbuffers \
+    flatbuffers-native \
     keyutils \
     libhwsec \
     lvm2 \
@@ -30,8 +31,9 @@ DEPENDS:append = " \
     nss \
     openssl \
     power-manager-client \
-    protobuf \
+    protobuf-native \
     protofiles \
+    python3-jinja2-native \
     rootdev \
     secure-erase-file \
     shill-client \
