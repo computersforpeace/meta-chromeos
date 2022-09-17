@@ -4,7 +4,7 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/tpm_ma
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+inherit chromeos_gn platform
 
 CHROMEOS_PN = "tpm_manager"
 
@@ -59,24 +59,7 @@ do_compile() {
 export SO_VERSION="1"
 
 do_install() {
-    # Install D-Bus client library.
-    install -d ${D}${includedir}/tpm_manager-client/tpm_manager
-    install -m 0644 ${B}/gen/include/tpm_manager/dbus-proxies.h \
-                    ${D}${includedir}/tpm_manager-client/tpm_manager/
-    install -d ${D}${includedir}/tpm_manager-client-test/tpm_manager
-    install -m 0644 ${B}/gen/include/tpm_manager/dbus-proxy-mocks.h \
-                    ${D}${includedir}/tpm_manager-client-test/tpm_manager/
-
-    install -d ${D}${libdir}/pkgconfig
-    sed \
-      -e "s|@INCLUDE_DIR@|${includedir}|g" \
-      -e "s|@PV@|${PV}|g" \
-         "${S}/libtpm_manager-client.pc.in" > "${D}${libdir}/pkgconfig/libtpm_manager-client.pc"
-
-     sed \
-       -e "s|@INCLUDE_DIR@|${includedir}|g" \
-       -e "s|@PV@|${PV}|g" \
-          "${S}/libtpm_manager-client-test.pc.in" > "${D}${libdir}/pkgconfig/libtpm_manager-client-test.pc"
+    platform_install_dbus_client_lib "tpm_manager"
 
     install -d ${D}${bindir}
     install -m 0755 ${B}/tpm_manager_client ${D}${bindir}/

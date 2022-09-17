@@ -17,12 +17,12 @@ platform_install_dbus_client_lib() {
         install -d ${D}${libdir}/pkgconfig
         sed \
 	   -e "s|@PV@|${PV}|g" \
-           -e "s|@INCLUDE_DIR@|${includedir}|g" \
+           -e "s|@INCLUDE_DIR@|${client_includes}|g" \
               "${S}/lib${libname}-client.pc.in" > "${D}${libdir}/pkgconfig/lib${libname}-client.pc"
 
         sed \
 	   -e "s|@PV@|${PV}|g" \
-           -e "s|@INCLUDE_DIR@|${includedir}|g" \
+           -e "s|@INCLUDE_DIR@|${client_test_includes}|g" \
               "${S}/lib${libname}-client-test.pc.in" > "${D}${libdir}/pkgconfig/lib${libname}-client-test.pc"
     fi
 }
