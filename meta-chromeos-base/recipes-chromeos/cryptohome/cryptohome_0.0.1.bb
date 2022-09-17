@@ -4,7 +4,7 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/crypto
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn useradd
+inherit chromeos_gn python3native useradd
 
 S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
@@ -100,10 +100,6 @@ GN_ARGS += ' \
         downloads_bind_mount=${@bb.utils.contains('PACKAGECONFIG', 'downloads_bind_mount', 'true', 'false', d)} \
         fuzzer=${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} \
         generic_tpm2=${@bb.utils.contains('PACKAGECONFIG', 'generic_tpm2', 'true', 'false', d)} \
-        kernel-5_15=${@bb.utils.contains('PACKAGECONFIG', 'kernel-5_15', 'true', 'false', d)} \
-        kernel-5_10=${@bb.utils.contains('PACKAGECONFIG', 'kernel-5_10', 'true', 'false', d)} \
-        kernel-5_4=${@bb.utils.contains('PACKAGECONFIG', 'kernel-5_4', 'true', 'false', d)} \
-        kernel-upstream=${@bb.utils.contains('PACKAGECONFIG', 'kernel-upstream', 'true', 'false', d)} \
         lvm_stateful_partition=${@bb.utils.contains('PACKAGECONFIG', 'lvm_stateful_partition', 'true', 'false', d)} \
         mount_oop=${@bb.utils.contains('PACKAGECONFIG', 'mount_oop', 'true', 'false', d)} \
         pinweaver=${@bb.utils.contains('PACKAGECONFIG', 'pinweaver', 'true', 'false', d)} \
@@ -118,7 +114,6 @@ GN_ARGS += ' \
         tpm2=${@bb.utils.contains('PACKAGECONFIG', 'tpm2', 'true', 'false', d)} \
         tpm2_simulator=${@bb.utils.contains('PACKAGECONFIG', 'tpm2_simulator', 'true', 'false', d)} \
         test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
-        uprev-4-to-5=${@bb.utils.contains('PACKAGECONFIG', 'uprev-4-to-5', 'true', 'false', d)} \
         user_session_isolation=${@bb.utils.contains('PACKAGECONFIG', 'user_session_isolation', 'true', 'false', d)} \
         uss_migration=${@bb.utils.contains('PACKAGECONFIG', 'uss_migration', 'true', 'false', d)} \
         vault_legacy_mount=${@bb.utils.contains('PACKAGECONFIG', 'vault_legacy_mount', 'true', 'false', d)} \
@@ -134,7 +129,7 @@ USERADD_PARAM:${PN} = "-u 20107 -U -c 'bootlockbox daemon' -d /dev/null -r -s /b
 USERADD_PARAM:${PN} = "-u 292 -U -c 'cryptohome service and client' -d /dev/null -r -s /bin/false cryptohome"
 
 do_compile() {
-    ninja -C ${B}
+    ninja -C ${B} cryptohome:all
 }
 
 python check_direncryption_allow_v2() {
