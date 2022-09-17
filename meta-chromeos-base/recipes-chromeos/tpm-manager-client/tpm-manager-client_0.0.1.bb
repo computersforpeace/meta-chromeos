@@ -77,6 +77,7 @@ do_install() {
     install -m 0644 ${S}/*.h ${D}${includedir}/tpm_manager/client/
     install -d ${D}${includedir}/tpm_manager/common
     install -m 0644 ${S}/../common/*.h ${D}${includedir}/tpm_manager/common/
+    install -m 0644 gen/tpm_manager/common/*.h ${D}${includedir}/tpm_manager/common/
 }
 
 PROVIDES += "libtpm-manager-client"
