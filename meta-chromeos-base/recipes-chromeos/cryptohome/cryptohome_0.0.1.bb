@@ -27,6 +27,7 @@ DEPENDS:append = " \
     libhwsec \
     lvm2 \
     metrics \
+    nss \
     openssl \
     power-manager-client \
     protobuf \
