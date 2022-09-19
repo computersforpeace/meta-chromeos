@@ -4,7 +4,7 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/attest
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn useradd
+inherit chromeos_gn platform useradd
 
 SRC_URI += "\
     file://0001-HACK-attestation-Handle-proto-printing-deprecated-fi.patch \
@@ -107,7 +107,7 @@ do_compile() {
     ninja -C ${B}
 }
 
-do_install() {
+other_install() {
     install -d ${D}${includedir}/attestation/common
     install -m 0644 ${S}/common/attestation_interface.h ${D}${includedir}/attestation/common/
     install -m 0644 ${B}/gen/attestation/common/print_attestation_ca_proto.h ${D}${includedir}/attestation/common/
@@ -119,6 +119,12 @@ do_install() {
     install -d ${D}${includedir}/attestation/pca-agent/dbus_adaptors
     install -m 0644 ${B}/gen/include/attestation/pca-agent/dbus_adaptors/org.chromium.PcaAgent.h \
                     ${D}${includedir}/attestation/pca-agent/dbus_adaptors
+}
+
+python do_install() {
+    platform_install(d)
+
+    bb.build.exec_func('other_install', d)
 }
 
 FILES:${PN}-dev += "${includedir}/attestation/common/*.h"

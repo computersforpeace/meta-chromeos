@@ -1,3 +1,135 @@
+DEPENDS += "gn-native"
+
+FILES:${PN} += "/usr/share/policy"
+def platform_install(d):
+    import collections
+    import itertools
+    import json
+    import os
+
+    target = d.expand('${PN}')
+
+    arch = d.expand('${TARGET_ARCH}')
+    if arch == 'x86_64':
+        arch = 'amd64'
+
+    env = os.environ
+    env['ARCH'] = arch
+
+    out, _ = bb.process.run(['gn', 'desc', d.expand("${B}"), '//%s/*' % target, '--root=' + d.expand("${WORKDIR}/src/platform2"), '--args=' + d.expand("${GN_ARGS}"), '--format=json', '--all'], env=env)
+
+    j = json.loads(out)
+    bb.debug(1, 'out = %s' % out)
+    bb.debug(1, 'json = %s' % j)
+
+    deps = j.get("//%s:all" % target, {}).get("deps", [])
+    config_group = collections.defaultdict(list)
+    for dep in deps:
+        install_config = j.get(dep, {}).get("metadata", {}).get("_install_config")
+        if not install_config:
+            continue
+        install_config = install_config[0]
+        sources = install_config.get("sources")
+        if not sources:
+            continue
+        install_path = install_config.get("install_path")
+        outputs = install_config.get("outputs")
+        symlinks = install_config.get("symlinks")
+        recursive = install_config.get("recursive")
+        options = install_config.get("options")
+        command_type = install_config.get("type")
+        do_glob = install_config.get("glob")
+        tree_relative_to = install_config.get("tree_relative_to")
+
+        if do_glob:
+            sources = list(
+              itertools.chain.from_iterable(
+                # glob is always recursive to support **.
+                glob.glob(x, recursive=True)
+                for x in sources
+                )
+              )
+        if tree_relative_to:
+            for source in sources:
+                new_install_path = install_path
+                relpath = os.path.relpath(source, tree_relative_to)
+                new_install_path = os.path.join(
+                    install_path, os.path.dirname(relpath)
+                )
+                config_key = (
+                    new_install_path,
+                    recursive,
+                    options,
+                    command_type,
+                )
+                config_group[config_key].append(
+                    ([source], outputs, symlinks)
+                )
+        else:
+            config_key = (install_path, recursive, options, command_type)
+            config_group[config_key].append((sources, outputs, symlinks))
+
+    cmd_list = []
+    for install_config, install_args in config_group.items():
+        args = []
+        # Commands to install sources without explicit outputs nor symlinks
+        # can be merged into one. Concat all such sources.
+        sources = sum(
+            [
+                sources
+                for sources, outputs, symlinks in install_args
+                if not outputs and not symlinks
+            ],
+            [],
+        )
+        if sources:
+            args.append((sources, None, None))
+        # Append all remaining sources/outputs/symlinks.
+        args += [
+            (sources, outputs, symlinks)
+            for sources, outputs, symlinks in install_args
+            if outputs or symlinks
+        ]
+        # Generate the command line.
+        install_path, recursive, options, command_type = install_config
+        for sources, outputs, symlinks in args:
+            if not command_type:
+                if not symlinks:
+                    install_type = "ins"
+                else:
+                    install_type = "sym"
+                    if install_path:
+                        outputs = [
+                            os.path.join(install_path, symlink) for symlink in symlinks
+                        ]
+                    else:
+                        outputs = symlinks
+                cmd_list += [['install', '-D', '-m', '0644', '-t', d.expand("${D}") + install_path] + sources]
+            elif command_type == "executable":
+                pass
+            elif command_type == "shared_library":
+                #for s, o in zip(sources, outputs):
+                    #if o == "lib":
+                        #o = d.expand("${libdir}")
+                    #cmd_list += ['install', '-D', '-m', '0755', s, d.expand("${D}") + o]
+                if install_path == 'lib':
+                    install_path = d.expand("${libdir}")
+                for s in sources:
+                    so_name = os.path.basename(s)
+                    so_name_ver = so_name + d.expand(".${SO_VERSION}")
+                    cmd_list += [
+                        ['install', '-D', '-m', '0755', s, os.path.join(d.expand("${D}" + install_path), so_name_ver)],
+                        ['ln', '-sf', so_name_ver, os.path.join(d.expand("${D}" + install_path), so_name)],
+                    ]
+                #cmd_list += [['install', '-D', '-m', '0755', '-t', d.expand("${D}") + install_path] + sources]
+            else:
+                bb.fatal('Unimplemented command type: %s' % command_type)
+
+    bb.debug(1, 'cmd_list = %s' % cmd_list)
+    for cmd in cmd_list:
+        bb.process.run(cmd)
+
+
 platform_install_dbus_client_lib() {
     libname=${1:-${PN}}
 
