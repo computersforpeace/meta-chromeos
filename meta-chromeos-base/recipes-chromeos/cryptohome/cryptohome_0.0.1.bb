@@ -148,6 +148,8 @@ python check_direncryption_allow_v2() {
                  " Note, uprev boards should have it disabled!")
 }
 
+FILES:${PN} += "/usr/share/cros"
+FILES:${PN} += "/usr/share/policy"
 do_install() {
     install -d ${D}${bindir}
     install -m 0755 ${B}/cryptohomed ${D}${bindir}/
@@ -170,7 +172,7 @@ do_install() {
     install -m 0644 ${S}/etc/org.chromium.UserDataAuth.conf ${D}${sysconfdir}/dbus-1/system.d/
     install -m 0644 ${S}/etc/BootLockbox.conf ${D}${sysconfdir}/dbus-1/system.d/
 
-    check_direncryption_allow_v2
+    check_direncryption_allow_v2()
 
     # Install init scripts
     if ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)}; then
@@ -247,6 +249,9 @@ do_install() {
     # Install udev rules for cryptohome
     install -d ${D}${sysconfdir}/udev/rules.d
     install -m 0644 ${S}/udev/50-dm-cryptohome.rules ${D}${sysconfdir}/udev/rules.d/
+
+    ARCH=${TARGET_ARCH}
+    [ "${ARCH}" = x86_64 ] && ARCH=amd64
 
     # Install seccomp policy for bootlockboxd
     install -d ${D}${datadir}/policy
