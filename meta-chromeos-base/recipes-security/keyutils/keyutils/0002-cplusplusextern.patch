@@ -1,0 +1,49 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+From: Christophe Vu-Brugier <cvubrugier@fastmail.fm>
+Date: Thu, 02 Jul 2020 08:57:23 +0000
+Subject: [PATCH 4/4] Fix error when a C++ program is linked with libkeyutils
+Message-Id: <20200702085723.7026-5-cvubrugier@fastmail.fm>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+List-Id: <keyrings.vger.kernel.org>
+References: <20200702085723.7026-1-cvubrugier@fastmail.fm>
+In-Reply-To: <20200702085723.7026-1-cvubrugier@fastmail.fm>
+To: keyrings@vger.kernel.org
+Cc: David Howells <dhowells@redhat.com>, =?utf-8?q?Stephan_M=C3=BCller?= <smueller@chronox.de>, Christophe Vu-Brugier <cvubrugier@fastmail.fm>
+
+Declare all the functions as extern "C" in keyutils.h to instruct a
+C++ compiler that these functions are not mangled.
+
+Signed-off-by: Christophe Vu-Brugier <cvubrugier@fastmail.fm>
+---
+ keyutils.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/keyutils.h b/keyutils.h
+index bdecf15..4ae81d3 100644
+--- a/keyutils.h
++++ b/keyutils.h
+@@ -15,6 +15,10 @@
+ #include <sys/types.h>
+ #include <stdint.h>
+ 
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ extern const char keyutils_version_string[];
+ extern const char keyutils_build_string[];
+ 
+@@ -268,4 +272,8 @@ extern int recursive_session_key_scan(recursive_key_scanner_t func, void *data);
+ extern key_serial_t find_key_by_type_and_desc(const char *type, const char *desc,
+ 					      key_serial_t destringid);
+ 
++#ifdef __cplusplus
++}
++#endif
++
+ #endif /* KEYUTILS_H */
+-- 
+2.27.0
+
