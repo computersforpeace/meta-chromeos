@@ -81,7 +81,7 @@ do_install() {
     install -m 0644 ${S}/SessiongManager.conf ${D}${sysconfigdir}/dbus-1/system.d/
 
     # Adding init scripts
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)}; then
         install -m 0644 ${S}/init/systemd/* ${D}${systemd_unitdir}/
     else
         install -d ${D}${sysconfdir}/init

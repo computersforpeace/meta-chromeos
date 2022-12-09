@@ -81,7 +81,7 @@ do_install() {
     install -m 0755 ${S}/cros_config_mock.sh ${D}${bindir}/cros_config_mock
 
     install -d ${D}${sbindir}
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'unibuild', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'unibuild', 'true', 'false', d)}; then
         install -m 0755 ${S}/scripts/cros_config_setup.sh ${D}${sbindir}/cros_config_setup
     else
 	install -m 0755 ${S}/scripts/cros_config_setup_legacy.sh ${D}${sbindir}/cros_config_setup

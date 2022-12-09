@@ -21,7 +21,7 @@ PACKAGECONFIG[python] = ",,,${PYTHON_RDEPS},,"
 do_install() {
     oe_runmake DESTDIR="${D}" USE_PKG_CONFIG=1 install
 
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'python', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'python', 'true', 'false', d)}; then
         install -d ${D}${PYTHON_SITEPACKAGES_DIR}
         install -m 0755 ${S}/fmap.py ${D}${PYTHON_SITEPACKAGES_DIR}/
     fi

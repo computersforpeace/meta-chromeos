@@ -162,7 +162,7 @@ do_install() {
     install -m 0755 ${B}/encrypted-reboot-vault ${D}${bindir}/
     install -m 0755 ${B}/bootlockboxd ${D}${bindir}/
     install -m 0755 ${B}/bootlockboxtool ${D}${bindir}/
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'cert_provision', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'cert_provision', 'true', 'false', d)}; then
         install -m 0755 ${B}/cert_provision_client ${D}${bindir}/
     fi
 
@@ -173,9 +173,9 @@ do_install() {
     check_direncryption_allow_v2
 
     # Install init scripts
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)}; then
         install -d ${D}${systemd_system_unit_dir}
-        if [ ${@bb.utils.contains('PACKAGECONFIG', 'tpm2', 'true', 'false', d)} ]; then
+        if ${@bb.utils.contains('PACKAGECONFIG', 'tpm2', 'true', 'false', d)}; then
             sed 's/tcsd.service/attestationd.service/' \
                 ${S}/init/cryptohomed.service > ${B}/cryptohomed.service
             install -m 0644 ${B}/cryptohomed.service ${D}${systemd_system_unit_dir}/
@@ -201,13 +201,13 @@ do_install() {
         install -m 0644 ${S}/init/init-homedirs.conf ${D}${sysconfdir}/init/
         install -m 0644 ${S}/init/send-mount-encrypted-metrics.conf ${D}${sysconfdir}/init/
 
-        if [ ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)} ]; then
+        if ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)}; then
             install -m 0644 ${S}/init/lockbox-cache.conf.tpm_dynamic ${D}${sysconfdir}/init/lockbox-cache.conf
         else
             install -m 0644 ${S}/init/lockbox-cache.conf ${D}${sysconfdir}/init/
         fi
 
-        if [ ${@bb.utils.contains('PACKAGECONFIG', 'direncryption', 'true', 'false', d)} ]; then
+        if ${@bb.utils.contains('PACKAGECONFIG', 'direncryption', 'true', 'false', d)}; then
             sed -i '/env DIRENCRYPTION_FLAG=/s:=.*:="--direncryption":' \
             ${D}${sysconfdir}/init/cryptohomed.conf ||
             bbfatal "Can't replace direncyption flag in cryptohomed.conf"
@@ -225,7 +225,7 @@ do_install() {
             bbfatal "Can't replace no_downloads_bind_mount flag in cryptohomed.conf"
         fi
 
-        if [ ${@bb.utils.contains('PACKAGECONFIG', 'direncription_allow_v2', 'true', 'false', d)} ]; then
+        if ${@bb.utils.contains('PACKAGECONFIG', 'direncription_allow_v2', 'true', 'false', d)}; then
             sed -i '/env FSCRYPT_V2_FLAG=/s:=.*:="--fscrypt_v2":' \
             ${D}${sysconfdir}/init/cryptohomed.conf ||
             bbfatal "Can't replace fscrypt_v2 flag in cryptohomed.conf"
@@ -233,13 +233,13 @@ do_install() {
     fi
 
     install -d ${D}${datadir}/cros/init
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)}; then
         install -m 0755 ${S}/init/lockbox-cache.sh.tpm_dynamic ${D}${datadir}/cros/init/lockbox-cache.sh
     else
         install -m 0755 ${S}/init/lockbox-cache.sh ${D}${datadir}/cros/init/
     fi
 
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'cert_provision', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'cert_provision', 'true', 'false', d)}; then
         install -d ${D}${includedir}/cryptohome
         install -m 0644 ${S}/init/cert_provision.h ${D}${includedir}/cryptohome/
     fi

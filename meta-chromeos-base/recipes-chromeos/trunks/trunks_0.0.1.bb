@@ -91,14 +91,14 @@ do_compile() {
 do_install() {
     install -D -m 0644 -t ${D}/etc/dbus-1/system.d/ ${S}/org.chromium.Trunks.conf
 
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'cr50_onboard', 'true', 'false', d)} ] ||
+    if ${@bb.utils.contains('PACKAGECONFIG', 'cr50_onboard', 'true', 'false', d)} ||
        [ ${@bb.utils.contains('PACKAGECONFIG', 'ti50_onboard', 'true', 'false', d)} ]; then
         install -D -m 0644 ${S}/trunksd.conf.cr50 ${D}/etc/init/trunksd.conf
     else
         install -D -m 0644 ${S}/trunksd.conf ${D}/etc/init/trunksd.conf
     fi
 
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)}; then
         sed -i '/env TPM_DYNAMIC=/s:=.*:=true:' \
             "${D}/etc/init/trunksd.conf"
     fi
@@ -106,7 +106,7 @@ do_install() {
     install -D -t ${D}${sbindir} pinweaver_client
     install -D -t ${D}${sbindir} trunks_client
     install -D -t ${D}${sbindir} trunks_send
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)} ]; then
+    if ${@bb.utils.contains('PACKAGECONFIG', 'tpm_dynamic', 'true', 'false', d)}; then
         install -D ${S}/tpm_version ${D}${sbindir}/tpm2_version
     else
         install -D -t ${D}${sbindir} ${S}/tpm_version
@@ -127,7 +127,7 @@ do_install() {
     ARCH=${TARGET_ARCH}
     [ "${ARCH}" = x86_64 ] && ARCH=amd64
 
-    if [ ${@bb.utils.contains('PACKAGECONFIG', 'pinweaver_csme', 'true', 'false', d)} ] &&
+    if ${@bb.utils.contains('PACKAGECONFIG', 'pinweaver_csme', 'true', 'false', d)} &&
        [ ${@bb.utils.contains('PACKAGECONFIG', 'generic_tpm2', 'true', 'false', d)} ]; then
         install -D -m 0644 ${S}/csme/tpm_tunneld.conf ${D}/etc/init/tpm_tunneld.conf
 
