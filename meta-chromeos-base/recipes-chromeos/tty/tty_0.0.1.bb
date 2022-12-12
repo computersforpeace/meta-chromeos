@@ -28,6 +28,7 @@ PACKAGECONFIG ??= "${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)}"
 PACKAGECONFIG[systemd] = ""
 
 generate_init_script() {
+    port="$1"
     # Creates an init script per activated console by copying the base script and
     # changing the port number.
     sed -e "s|%PORT%|${port}|g" \
@@ -35,22 +36,29 @@ generate_init_script() {
     bbfatal "failed to generate ${port}"
 }
 
+# TODO: translate old TTY_CONSOLE (USE_EXPAND to TTY_CONSOLE_ttySx) to
+# SERIAL_CONSOLES/SERIAL_CONSOLES_CHECK?
+# And properly support SERIAL_CONSOLES.
 do_compile() {
     # Generate a file for each activated tty console.
     if ! ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} ; then
-        for item in ${IUSE_PORTS}; do
+        for item in ${SERIAL_CONSOLES_CHECK}; do
             generate_init_script ${item}
         done
     fi
 }
 
+# Generate a package even if there are no consoles, so our reverse dependencies
+# won't complain.
+ALLOW_EMPTY:${PN} = "1"
+
 do_install() {
-	if [[ -n ${TTY_CONSOLE} ]]; then
+        if [ -n "${SERIAL_CONSOLES_CHECK}" ]; then
                 if ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} ; then
                         systemd_dounit "${TTY_FILESDIR}/chromeos-tty@.service"
-                        for item in ${IUSE_PORTS}; do
+                        for item in ${SERIAL_CONSOLES_CHECK}; do
                                 if use ${item}; then
-                                        port="${item#${USE_PREFIX}}"
+                                        port="${item#${USE_PREFIX}}" # TODO: This is broken.
                                         unit_dir=${systemd_unit_dir}
                                         dosym  "../chromeos-tty@.service" \
                                                 "${unit_dir}/boot-services.target.wants/chromeos-tty@${port}.service"
