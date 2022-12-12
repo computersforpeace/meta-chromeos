@@ -14,103 +14,105 @@ for ebuild in $ebuilds; do
 	mkdir -p ./recipes-generated/${PN}
 	RECIPE="./recipes-generated/${PN}/${PN}_${PV}.bb"
 	touch $RECIPE
-	echo "SUMMARY = \"${DESCRIPTION}\"\nDESCRIPTION = \"${DESCRIPTION}\"" >> $RECIPE
+	{
+	printf "SUMMARY = \"${DESCRIPTION}\"\nDESCRIPTION = \"${DESCRIPTION}\"\n"
 	if [ -n ${HOMEPAGE} ]; then
-	    echo "HOMEPAGE = \"${HOMEPAGE}\"" >> $RECIPE
+	    echo "HOMEPAGE = \"${HOMEPAGE}\""
 	fi
 	case $LICENSE in
 		BSD-Google)
-			echo 'LICENSE = "BSD-3-Clause"\nLIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"' >> $RECIPE
+			echo 'LICENSE = "BSD-3-Clause"\nLIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"'
 			;;
 		GPL-2)
-			echo 'LICENSE = "GPL-2.0"' >> $RECIPE
+			echo 'LICENSE = "GPL-2.0"'
 			;;
 		*)
-			echo "LICENSE = \"${LICENSE}\"" >> $RECIPE
+			echo "LICENSE = \"${LICENSE}\""
 			;;
 	esac
 	if [ -n "${HOMEPAGE}" ]; then
 		platform2="$(echo ${HOMEPAGE} | grep platform2 )"
 		platform="$(echo ${HOMEPAGE} | grep \/chromiumos\/platform\/ )"
-		echo "\ninherit chromeos_gn" >> $RECIPE
+		printf "\ninherit chromeos_gn\n"
 		if [ -n "${platform2}" ]; then
 			if [ "${CHROMEOS_PN}" = "${PN}" ]; then
-				echo '\nS = "${WORKDIR}/src/platform2/${BPN}"' >> $RECIPE
+				printf '\nS = "${WORKDIR}/src/platform2/${BPN}"\n'
 			else
-				echo "\nCHROMEOS_PN = \"${CHROMEOS_PN}\"" >> $RECIPE
-				echo '\nS = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"' >> $RECIPE
+				printf "\nCHROMEOS_PN = \"${CHROMEOS_PN}\"\n"
+				printf '\nS = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"\n'
 			fi
-		        echo 'B = "${WORKDIR}/build"' >> $RECIPE
+		        echo 'B = "${WORKDIR}/build"'
 		elif [ -n "${platform}" ]; then
 			base_platform="$(grep HOMEPAGE $ebuild | gawk 'match($0, /platform\/([a-z0-9_-]*)/, h) {print h[1]}')"
 			echo "DEBUG:  base_platform=${base_platform}"
 			if [ "${CHROMEOS_PN}" != "${base_platform}" -a "${base_platform}" != "" ]; then
-				echo "require recipes-chromeos/chromiumos-platform/chromiumos-platform-${base_platform}.inc" >> $RECIPE
-				echo "\nS = \"${WORKDIR}/src/platform/${base_platform}\"" >> $RECIPE
+				echo "require recipes-chromeos/chromiumos-platform/chromiumos-platform-${base_platform}.inc"
+				printf "\nS = \"${WORKDIR}/src/platform/${base_platform}\"\n"
 			elif [ "${CHROMEOS_PN}" = "${PN}" ]; then
-				echo 'require recipes-chromeos/chromiumos-platform/chromiumos-platform-${BPN}.inc' >> $RECIPE
-				echo '\nS = "${WORKDIR}/src/platform/${BPN}"' >> $RECIPE
+				echo 'require recipes-chromeos/chromiumos-platform/chromiumos-platform-${BPN}.inc'
+				printf '\nS = "${WORKDIR}/src/platform/${BPN}"\n'
 			else
-				echo "\nCHROMEOS_PN = \"${CHROMEOS_PN}\"" >> $RECIPE
-				echo 'require recipes-chromeos/chromiumos-platform/chromiumos-platform-${CHROMEOS_PN}.inc' >> $RECIPE
-				echo '\nS = "${WORKDIR}/src/platform/${CHROMEOS_PN}"' >> $RECIPE
+				printf "\nCHROMEOS_PN = \"${CHROMEOS_PN}\"\n"
+				echo 'require recipes-chromeos/chromiumos-platform/chromiumos-platform-${CHROMEOS_PN}.inc'
+				printf '\nS = "${WORKDIR}/src/platform/${CHROMEOS_PN}"\n'
 			fi
-			echo 'B = "${WORKDIR}/build"' >> $RECIPE
+			echo 'B = "${WORKDIR}/build"'
 		fi
 	fi
-	echo "PR = \"${PR}\"\n" >> $RECIPE
+	printf "PR = \"${PR}\"\n\n"
 
 	if [ -n "${platform2}" ]; then
 		if [ "${CHROMEOS_PN}" = "${PN}" ]; then
-			echo "GN_ARGS += 'platform_subdir=\"\${BPN}\"'\n" >> $RECIPE
+			printf "GN_ARGS += 'platform_subdir=\"\${BPN}\"'\n\n"
 		else
-			echo "GN_ARGS += 'platform_subdir=\"\${CHROMEOS_PN}\"'\n" >> $RECIPE
+			printf "GN_ARGS += 'platform_subdir=\"\${CHROMEOS_PN}\"'\n\n"
 		fi
 	elif [ -n "${platform}" ]; then
 		if [ "${CHROMEOS_PN}" = "${PN}" ]; then
-			echo "GN_ARGS += 'platform_subdir=\"../platform/\${BPN}\"'\n" >> $RECIPE
+			printf "GN_ARGS += 'platform_subdir=\"../platform/\${BPN}\"'\n\n"
 		else
-			echo "GN_ARGS += 'platform_subdir=\"../platform/\${CHROMEOS_PN}\"'\n" >> $RECIPE
+			printf "GN_ARGS += 'platform_subdir=\"../platform/\${CHROMEOS_PN}\"'\n\n"
 		fi
 	fi
 
 	IUSE="$(grep IUSE $ebuild | gawk 'match($0, /IUSE="(.*)"$/, h) {print h[1]}' | head -1 | tr -d '+' | tr -d '-')"
 	if [ "${IUSE}" != "" ]; then
-		echo "PACKAGECONFIG ??= \"\"\n" >> $RECIPE
-		echo "# Description of all the possible PACKAGECONFIG fields (comma delimited):" >> $RECIPE
-		echo "# 1. Extra arguments that should be added to the configure script argument list (EXTRA_OECONF or PACKAGECONFIG_CONFARGS) if the feature is enabled." >> $RECIPE
-		echo "# 2. Extra arguments that should be added to EXTRA_OECONF or PACKAGECONFIG_CONFARGS if the feature is disabled." >> $RECIPE
-		echo "# 3. Additional build dependencies (DEPENDS) that should be added if the feature is enabled." >> $RECIPE
-		echo "# 4. Additional runtime dependencies (RDEPENDS) that should be added if the feature is enabled." >> $RECIPE
-		echo "# 5. Additional runtime recommendations (RRECOMMENDS) that should be added if the feature is enabled." >> $RECIPE
-		echo "# 6. Any conflicting (that is, mutually exclusive) PACKAGECONFIG settings for this feature.\n" >> $RECIPE
+		printf "PACKAGECONFIG ??= \"\"\n\n"
+		echo "# Description of all the possible PACKAGECONFIG fields (comma delimited):"
+		echo "# 1. Extra arguments that should be added to the configure script argument list (EXTRA_OECONF or PACKAGECONFIG_CONFARGS) if the feature is enabled."
+		echo "# 2. Extra arguments that should be added to EXTRA_OECONF or PACKAGECONFIG_CONFARGS if the feature is disabled."
+		echo "# 3. Additional build dependencies (DEPENDS) that should be added if the feature is enabled."
+		echo "# 4. Additional runtime dependencies (RDEPENDS) that should be added if the feature is enabled."
+		echo "# 5. Additional runtime recommendations (RRECOMMENDS) that should be added if the feature is enabled."
+		echo "# 6. Any conflicting (that is, mutually exclusive) PACKAGECONFIG settings for this feature.\n"
 
-		echo "# Empty PACKAGECONFIG options listed here to avoid warnings." >> $RECIPE
-		echo "# The .bb file should use these to conditionally add patches," >> $RECIPE
-		echo "# command-line switches and dependencies." >> $RECIPE
+		echo "# Empty PACKAGECONFIG options listed here to avoid warnings."
+		echo "# The .bb file should use these to conditionally add patches,"
+		echo "# command-line switches and dependencies."
 
 		for use in $IUSE; do
-			echo "PACKAGECONFIG[${use}] = \"\"" >> $RECIPE
+			echo "PACKAGECONFIG[${use}] = \"\""
 		done
-		echo >> $RECIPE
-		echo "GN_ARGS += ' \\" >> $RECIPE
-		echo "    use={ \\" >> $RECIPE
+		echo
+		echo "GN_ARGS += ' \\"
+		echo "    use={ \\"
 		for use in $IUSE; do
-			echo "        ${use}=\${@bb.utils.contains('PACKAGECONFIG', '${use}', 'true', 'false', d)} \\" >> $RECIPE
+			echo "        ${use}=\${@bb.utils.contains('PACKAGECONFIG', '${use}', 'true', 'false', d)} \\"
 		done
-		echo "    } \\" >> $RECIPE
-		echo "'" >> $RECIPE
+		echo "    } \\"
+		echo "'"
 	fi		
 
-	echo "\ndo_compile() {" >> $RECIPE
+	printf "\ndo_compile() {\n"
 	if [ "${CHROMEOS_PN}" = "${PN}" ]; then
-		echo "    ninja -C \${B} \${BPN}" >> $RECIPE
+		echo "    ninja -C \${B} \${BPN}"
 	else
-		echo "    ninja -C \${B} \${CHROMEOS_PN}" >> $RECIPE
+		echo "    ninja -C \${B} \${CHROMEOS_PN}"
 	fi
-	echo "}\n" >> $RECIPE
+	printf "}\n\n"
 
-	echo "do_install() {" >> $RECIPE
-	echo "    :" >> $RECIPE
-	echo "}\n" >> $RECIPE
+	echo "do_install() {"
+	echo "    :"
+	echo "}"
+	} > "${RECIPE}"
 done
