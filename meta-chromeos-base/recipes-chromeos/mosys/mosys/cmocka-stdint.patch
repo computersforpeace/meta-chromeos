@@ -1,0 +1,36 @@
+diff --git a/lib/file/file_unittest.c b/lib/file/file_unittest.c
+index e8b792f4e562..a050ff60f202 100644
+--- a/lib/file/file_unittest.c
++++ b/lib/file/file_unittest.c
+@@ -31,6 +31,7 @@
+ #include <setjmp.h>
+ #include <stdarg.h>
+ #include <stddef.h>
++#include <stdint.h>
+ #include <unistd.h>
+ 
+ // cmocka doesn't include some headers it uses, e.g. setjmp. Prevent
+diff --git a/lib/math/math_unittest.c b/lib/math/math_unittest.c
+index 85c0e4244efa..ea09c7a74eea 100644
+--- a/lib/math/math_unittest.c
++++ b/lib/math/math_unittest.c
+@@ -31,6 +31,7 @@
+ #include <setjmp.h>
+ #include <stdarg.h>
+ #include <stddef.h>
++#include <stdint.h>
+ #include <stdio.h>
+ #include <string.h>
+ 
+diff --git a/lib/vpd/vpd_unittest.c b/lib/vpd/vpd_unittest.c
+index 54e075db350c..6b756c0abc5f 100644
+--- a/lib/vpd/vpd_unittest.c
++++ b/lib/vpd/vpd_unittest.c
+@@ -5,6 +5,7 @@
+ 
+ #include <setjmp.h>
+ #include <stdarg.h>
++#include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
