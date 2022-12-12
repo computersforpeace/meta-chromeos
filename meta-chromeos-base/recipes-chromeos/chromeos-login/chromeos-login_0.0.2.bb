@@ -31,7 +31,7 @@ PR = "r5075"
 
 GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
-PACKAGECONFIG ??= "systemd"
+PACKAGECONFIG ??= ""
 
 # Description of all the possible PACKAGECONFIG fields (comma delimited):
 # 1. Extra arguments that should be added to the configure script argument list (EXTRA_OECONF or PACKAGECONFIG_CONFARGS) if the feature is enabled.
@@ -82,6 +82,7 @@ do_install() {
 
     # Adding init scripts
     if ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)}; then
+        install -d ${D}${systemd_unitdir}/
         install -m 0644 ${S}/init/systemd/* ${D}${systemd_unitdir}/
     else
         install -d ${D}${sysconfdir}/init
