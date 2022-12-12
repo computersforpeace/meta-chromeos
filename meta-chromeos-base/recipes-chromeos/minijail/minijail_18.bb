@@ -65,7 +65,14 @@ do_install() {
     install -m 0644 ${S}/scoped_minijail.h ${D}${includedir}/chromeos/
 }
 
+# Otherwise, QA checks complain about libminjail.so symlink, etc.
+# We want the .so symlink, because that's what 'mosys' (among others?) is
+# looking for.
+INSANE_SKIP:libminijail += "dev-so"
+
 FILES:${PN} = "${bindir}"
 FILES:libminijail = "${libdir}/*"
 PROVIDES += "libminijail"
 RPROVIDES:libminijail += "libminijail.so()(64bit)"
+# Rewrite this to force .so symlink back into libminijail.
+FILES:${PN}-dev = "${includedir} ${libdir}/pkgconfig/*"
