@@ -73,4 +73,8 @@ chromeos_gn_do_configure() {
 }
 do_configure[cleandirs] += "${OUTPUT_DIR}"
 
-EXPORT_FUNCTIONS do_configure
+chromeos_gn_do_compile() {
+    ninja -C ${B} ${CHROMEOS_PN}:all
+}
+
+EXPORT_FUNCTIONS do_configure do_compile
