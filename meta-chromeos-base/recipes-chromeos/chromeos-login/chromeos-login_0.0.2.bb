@@ -11,19 +11,24 @@ CHROMEOS_PN = "login_manager"
 DEPENDS:append = " \
     bootstat \
     chromeos-config-tools \
-    minijail \
+    chromeos-dbus-bindings-native \
     cryptohome \
+    github.com-golang-protobuf-native \
     libchromeos-ui \
     libcontainer \
+    libminijail \
     libpasswordprovider \
     metrics \
     nss \
     protobuf \
+    protobuf-native \
     util-linux \
     protofiles \
     system-api \
     vboot-reference \
 "
+
+RDEPENDS:${PN} += "libminijail"
 
 S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
@@ -46,9 +51,12 @@ PACKAGECONFIG ??= ""
 # command-line switches and dependencies.
 PACKAGECONFIG[arc_adb_sideloading] = ""
 PACKAGECONFIG[cheets] = ""
+PACKAGECONFIG[cros_host] = ""
 PACKAGECONFIG[flex_id] = ",,flex-id,,,"
 PACKAGECONFIG[fuzzer] = ",,libprotobuf-mutator,,,"
+PACKAGECONFIG[profiling] = ""
 PACKAGECONFIG[systemd] = ""
+PACKAGECONFIG[tcmalloc] = ""
 PACKAGECONFIG[test] = ""
 PACKAGECONFIG[user_session_isolation] = ""
 
@@ -56,18 +64,21 @@ GN_ARGS += ' \
     use={ \
         arc_adb_sideloading=${@bb.utils.contains('PACKAGECONFIG', 'arc_adb_sideloading', 'true', 'false', d)} \
         cheets=${@bb.utils.contains('PACKAGECONFIG', 'cheets', 'true', 'false', d)} \
+        cros_host=${@bb.utils.contains('PACKAGECONFIG', 'cros_host', 'true', 'false', d)} \
         flex_id=${@bb.utils.contains('PACKAGECONFIG', 'flex_id', 'true', 'false', d)} \
         fuzzer=${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} \
+        profiling=${@bb.utils.contains('PACKAGECONFIG', 'profiling', 'true', 'false', d)} \
         systemd=${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} \
+        tcmalloc=${@bb.utils.contains('PACKAGECONFIG', 'tcmalloc', 'true', 'false', d)} \
         test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
         user_session_isolation=${@bb.utils.contains('PACKAGECONFIG', 'user_session_isolation', 'true', 'false', d)} \
     } \
 '
 
-do_compile() {
-    ninja -C ${B}
-}
-
+tmpfilesdir = "/usr/lib/tmpfiles.d"
+FILES:${PN} += "${tmpfilesdir}"
+FILES:${PN} += "${datadir}"
+FILES:${PN} += "${sysconfdir}"
 do_install() {
     install -d ${D}${base_sbindir}
     install -m 0700 ${B}/keygen ${D}${base_sbindir}
@@ -77,8 +88,8 @@ do_install() {
     install -d ${D}${datadir}/dbus-1/interfaces
     install -m 0644 ${S}/dbus_bindings/org.chromium.SessionManagerInterface.xml ${D}${datadir}/dbus-1/interfaces/
 
-    install -d ${D}${sysconfigdir}/dbus-1/system.d
-    install -m 0644 ${S}/SessiongManager.conf ${D}${sysconfigdir}/dbus-1/system.d/
+    install -d ${D}${sysconfdir}/dbus-1/system.d
+    install -m 0644 ${S}/SessionManager.conf ${D}${sysconfdir}/dbus-1/system.d/
 
     # Adding init scripts
     if ${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)}; then
@@ -101,7 +112,7 @@ do_install() {
     install -d -m 0700 ${D}${sysconfdir}/skel/.pki
     install -d -m 0700 ${D}${sysconfdir}/skel/.pki/nssdb
     # Yes, the created (empty) DB does work on ARM, x86 and x86_64.
-    # certutil -N -d "sql:${D}/etc/skel/.pki/nssdb" -f <(echo '') || die
+    # certutil -N -d "sql:${D}/etc/skel/.pki/nssdb" -f <(echo '') || bbfatal
 
     install -d ${D}${sysconfdir}
     install -m 0644 ${S}/chrome_dev.conf ${D}${sysconfdir}/
