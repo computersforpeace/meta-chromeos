@@ -4,13 +4,14 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/libcon
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+inherit chromeos_gn eapi
 
 S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
 PR = "r1689"
 
 DEPENDS += "libbrillo libchrome libminijail"
+RDEPENDS:${PN} += "libbrillo libchrome libminijail"
 
 GN_ARGS += 'platform_subdir="${BPN}"'
 
@@ -50,6 +51,25 @@ do_compile() {
 }
 
 do_install() {
-    :
-}
+    #inherit() { :; }
+    #source ${FILE_DIRNAME}/libcontainer.ebuild
+    #into
+    #src_install
+    OUT=${B}
+    PV=1.0
+    get_libdir() { basename "${libdir}"; }
+    cd "${S}"
 
+    into /
+    INTO=/
+    dolib_so "${OUT}"/lib/libcontainer.so
+
+    "${S}"/platform2_preinstall.sh "${PV}" "/usr/include/chromeos" "${OUT}"
+    #insinto "/usr/$(get_libdir)/pkgconfig"
+    INSINTO="/usr/$(get_libdir)/pkgconfig"
+    doins "${OUT}"/libcontainer.pc
+
+    #insinto "/usr/include/chromeos"
+    INSINTO="/usr/include/chromeos"
+    doins libcontainer.h
+}
