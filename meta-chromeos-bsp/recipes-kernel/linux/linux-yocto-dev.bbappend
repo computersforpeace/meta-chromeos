@@ -11,3 +11,6 @@ COMPATIBLE_MACHINE:arm-generic = "arm-generic"
 COMPATIBLE_MACHINE:arm64-generic = "arm64-generic"
 COMPATIBLE_MACHINE:trogdor = "trogdor"
 COMPATIBLE_MACHINE:volteer = "volteer"
+
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+SRC_URI += "file://chromiumos-x86_64.cfg"
