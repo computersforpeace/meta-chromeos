@@ -6,6 +6,8 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 
 inherit chromeos_gn
 
+CHROMEOS_PN = "${BPN}"
+
 S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
 PR = "r395"
@@ -39,11 +41,25 @@ GN_ARGS += ' \
     } \
 '
 
-do_compile() {
-    ninja -C ${B}
-}
-
+FILES:${PN} += "${datadir}"
 do_install() {
-    :
+    install -d ${D}${datadir}/misc
+    install -m 0644 ${S}/share/chromeos-common.sh ${D}${datadir}/misc
+    install -m 0644 ${S}/share/lvm-utils.sh ${D}${datadir}/misc
+    if ${@bb.utils.contains('PACKAGECONFIG', 'direncryption', 'true', 'false', d)}; then
+        sed -i '/local direncryption_enabled=/s/false/true/' \
+            "${D}/usr/share/misc/chromeos-common.sh" ||
+            bbfatal "Can not set directory encryption in common library"
+    fi
+    if ${@bb.utils.contains('PACKAGECONFIG', 'fsverity', 'true', 'false', d)}; then
+        sed -i '/local fsverity_enabled=/s/false/true/' \
+            "${D}/usr/share/misc/chromeos-common.sh" ||
+            bbfatal "Can not set fs-verity in common library"
+    fi
+    if ${@bb.utils.contains('PACKAGECONFIG', 'prjquota', 'true', 'false', d)}; then
+        sed -i '/local prjquota_enabled=/s/false/true/' \
+            "${D}/usr/share/misc/chromeos-common.sh" ||
+            bbfatal "Can not set project quota in common library"
+    fi
 }
 
