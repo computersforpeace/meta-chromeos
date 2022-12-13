@@ -65,6 +65,10 @@ do_install() {
     install -d ${D}${includedir}/chromeos/chromeos-config/libcros_config
     install -m 0644 ${S}/libcros_config/*.h ${D}${includedir}/chromeos/chromeos-config/libcros_config/
 
+    (
+      cd ${S}
+      "${S}"/platform2_preinstall.sh 1.0 /usr/include/chromeos ${B}
+    )
     install -d ${D}${libdir}/pkgconfig
     PKGCONFIGS=$(find ${B} -name *.pc)
     for pkgconfig in $PKGCONFIGS; do
