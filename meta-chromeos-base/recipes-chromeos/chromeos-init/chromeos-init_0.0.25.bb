@@ -14,23 +14,37 @@ S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r4572"
 
+COMMON_DEPEND = "\
+bootstat \
+metrics \
+secure-erase-file \
+vboot-reference \
+re2 \
+rootdev \
+"
 
 # openssl PROVIDES libcrypto
 # metrics PROVIDES libmetrics
-DEPENDS += "bootstat libbrillo libchrome metrics openssl re2 rootdev secure-erase-file vboot-reference"
+DEPENDS += "${COMMON_DEPEND}"
 
+RDEPENDS:${PN} += "${COMMON_DEPEND}"
 RDEPENDS:${PN} += "\
     tar \
     jq \
     chromeos-common-script \
     tty \
     upstart \
+    util-linux \
     lsof \
     virtual/chromeos-bootcomplete \
 "
+#chromeos-base/common-assets
+#chromeos-base/chromeos-storage-info
+#chromeos-base/swap-init
+RDEPENDS:${PN} += "e2fsprogs"
 
 PACKAGECONFIG ??= "\
-    ${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd', 'upstart', d)} \
     ${@bb.utils.filter('MACHINE_FEATURES', 'tpm2', d)} \
     vtconsole"
 
@@ -53,11 +67,12 @@ PACKAGECONFIG[prjquota] = ""
 PACKAGECONFIG[profiling] = ""
 PACKAGECONFIG[s3halt] = ""
 PACKAGECONFIG[syslog] = ""
-PACKAGECONFIG[systemd] = ""
+PACKAGECONFIG[systemd] = ",,,,,"
 PACKAGECONFIG[tcmalloc] = ""
 PACKAGECONFIG[test] = ""
 PACKAGECONFIG[tpm2] = ""
 PACKAGECONFIG[udev] = ""
+PACKAGECONFIG[upstart] = ",,,systemd-tmpfiles,,"
 PACKAGECONFIG[vivid] = ""
 PACKAGECONFIG[vtconsole] = ""
 
