@@ -39,7 +39,7 @@ PACKAGECONFIG[test] = ",,gtest,,,"
 do_compile() {
     oe_runmake LIBDIR=${libdir}
     sed -e "s/@BSLOT@/${PV}/g" -e "s,@INCLUDE_DIR@,${includedir}/chromeos,g" \
-           "${S}/libminijail.pc.in" > libminijail.pc || die
+           "${S}/libminijail.pc.in" > libminijail.pc || bbfatal "Failed to modify PC file"
 
 }
 
