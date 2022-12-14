@@ -4,8 +4,6 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/region
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
-
 S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
 PR = "r2027"
@@ -34,10 +32,15 @@ GN_ARGS += ' \
 '
 
 do_compile() {
-    ninja -C ${B}
+    ./regions.py --format=json --output "${WORKDIR}/cros-regions.json" ${@bb.utils.contains('PACKAGECONFIG', 'crosdebug', '--include_pseudolocales', '', d)}
 }
 
+FILES:${PN} += "${datadir}/misc"
 do_install() {
-    :
+    install -d ${D}${bindir}
+    install -m 0755 ${S}/cros_region_data ${D}${bindir}/
+
+    install -d ${D}${datadir}/misc
+    install -m 0644 cros-regions.json "${D}${datadir}"/misc/
 }
 
