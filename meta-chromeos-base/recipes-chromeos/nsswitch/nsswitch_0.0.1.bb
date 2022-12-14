@@ -4,7 +4,6 @@ HOMEPAGE = "http://www.chromium.org/"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
 PR = "r1"
 
 PACKAGECONFIG ??= ""
@@ -28,11 +27,12 @@ GN_ARGS += ' \
     } \
 '
 
-do_compile() {
-    ninja -C ${B} ${BPN}
-}
-
 do_install() {
-    :
+    install -d ${D}${sysconfdir}
+    if ${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)}; then
+        f=${THISDIR}/files/nsswitch.mdns.conf
+    else
+        f=${THISDIR}/files/nsswitch.default.conf
+    fi
+    install -m 0644 "${f}" ${D}${sysconfdir}/nsswitch.conf
 }
-
