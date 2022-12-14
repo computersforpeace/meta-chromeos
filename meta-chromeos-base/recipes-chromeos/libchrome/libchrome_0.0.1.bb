@@ -40,31 +40,19 @@ SRCREV_lss = "92a65a8f5d705d1928874420c8d0d15bde8c89e5"
 
 # The order of patches is set in src/platform/libchrome/libchrome_tools/patches/patches
 #
-# libchrome/libchrome_tools contains a series of patches maintained by quilt(?).
-# So manually apply them before applying other local patches. Also remove all
-# temp files before leaving, because do_patch() will pop up all previously
-# applied patches in the start
+# libchrome/libchrome_tools contains its own series of patches; manually apply
+# them before applying other local patches.
 
 do_patch[depends] += "quilt-native:do_populate_sysroot"
 
-# see meta-openembedded/meta-networking/recipes-support/netcat/netcat-openbsd_1.195.bb
-# or meta-openemedded/meta-oe/recipes-multimedia/id3lib/id3lib_3.8.3.bb
 libchrome_do_patch() {
     cd ${S}
-    quilt pop -a || true
-    if [ -d ${S}/.pc-libchrome ]; then
-            rm -rf ${S}/.pc
-            mv ${S}/.pc-libchrome ${S}/.pc
-            QUILT_PATCHES=${S}/libchrome_tools/patches quilt pop -a
-            rm -rf ${S}/.pc
-    fi
     # The patches are not numbered, so we need to use the order in the
     # patches file
-    for f in $(grep "\.patch$" ${S}/libchrome_tools/patches/patches); do
-        QUILT_PATCHES=${S}/libchrome_tools/patches quilt import ${S}/libchrome_tools/patches/${f}
-        QUILT_PATCHES=${S}/libchrome_tools/patches quilt push ${f}
+    for f in $(grep "^[^#].*\.patch$" ${S}/libchrome_tools/patches/patches); do
+        patch -p0 <${S}/libchrome_tools/patches/${f} || \
+        patch -p1 <${S}/libchrome_tools/patches/${f}
     done
-    mv ${S}/.pc ${S}/.pc-libchrome
 }
 
 do_unpack[cleandirs] += "${S}"
