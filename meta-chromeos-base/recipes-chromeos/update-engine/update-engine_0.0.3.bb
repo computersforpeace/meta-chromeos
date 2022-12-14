@@ -2,9 +2,25 @@ SUMMARY = "Chrome OS Update Engine"
 DESCRIPTION = "Chrome OS Update Engine"
 HOMEPAGE = "https://chromium.googlesource.com/aosp/platform/system/update_engine/"
 LICENSE = "Apache-2.0"
+LIC_FILES_CHKSUM = "file://NOTICE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 inherit chromeos_gn
 PR = "r4145"
+
+# TODO: puffin, bsdiff
+DEPENDS:append = "\
+    libbrillo \
+    libchrome \
+    protobuf \
+    system-api \
+"
+
+CHROMEOS_PN = "update_engine"
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
+B = "${WORKDIR}/build"
+SRC_URI += "git://chromium.googlesource.com/aosp/platform/system/update_engine;protocol=https;branch=master;destsuffix=src/platform2/update_engine;name=chromiumos-platform-update_engine"
+SRCREV_chromiumos-platform-update_engine = "b25fe63f16bd014a13114ffb6153cc5bd82b6728"
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 PACKAGECONFIG ??= ""
 
@@ -30,6 +46,7 @@ PACKAGECONFIG[minios] = ""
 PACKAGECONFIG[power_management] = ""
 PACKAGECONFIG[report_requisition] = ""
 PACKAGECONFIG[systemd] = ""
+PACKAGECONFIG[test] = ""
 
 GN_ARGS += ' \
     use={ \
@@ -44,6 +61,7 @@ GN_ARGS += ' \
         power_management=${@bb.utils.contains('PACKAGECONFIG', 'power_management', 'true', 'false', d)} \
         report_requisition=${@bb.utils.contains('PACKAGECONFIG', 'report_requisition', 'true', 'false', d)} \
         systemd=${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} \
+        test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
     } \
 '
 
