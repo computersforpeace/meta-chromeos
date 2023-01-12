@@ -6,13 +6,23 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 
 inherit chromeos_gn
 
-CHROMEOS_PN = "shill"
+CHROMEOS_PN = "shill/net"
 
-S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}/net"
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r1034"
 
-GN_ARGS += 'platform_subdir="${CHROMEOS_PN}/net"'
+DEPENDS:append = "\
+    session-manager-client \
+    openssl \
+    protobuf \
+    system-api \
+    libbrillo \
+    libchrome \
+    re2 \
+"
+
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 PACKAGECONFIG ??= ""
 
@@ -27,12 +37,20 @@ PACKAGECONFIG ??= ""
 # Empty PACKAGECONFIG options listed here to avoid warnings.
 # The .bb file should use these to conditionally add patches,
 # command-line switches and dependencies.
+PACKAGECONFIG[cros_host] = ""
 PACKAGECONFIG[fuzzer] = ""
+PACKAGECONFIG[profiling] = ""
+PACKAGECONFIG[tcmalloc] = ""
+PACKAGECONFIG[test] = ""
 PACKAGECONFIG[wifi] = ""
 
 GN_ARGS += ' \
     use={ \
+        cros_host=${@bb.utils.contains('PACKAGECONFIG', 'cros_host', 'true', 'false', d)} \
         fuzzer=${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} \
+        profiling=${@bb.utils.contains('PACKAGECONFIG', 'profiling', 'true', 'false', d)} \
+        tcmalloc=${@bb.utils.contains('PACKAGECONFIG', 'tcmalloc', 'true', 'false', d)} \
+        test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
         wifi=${@bb.utils.contains('PACKAGECONFIG', 'wifi', 'true', 'false', d)} \
     } \
 '
@@ -42,6 +60,14 @@ do_compile() {
 }
 
 do_install() {
-    :
-}
+    ( cd "${S}"; ./preinstall.sh "${B}" 1 )
+    install -d ${D}${libdir}/pkgconfig
+    install -m 0644 lib/libshill-net.pc ${D}${libdir}/pkgconfig/
 
+    install -d ${D}${libdir}
+    install -m 0644 lib/libshill-net.so ${D}${libdir}/libshill-net.so.${SO_VERSION}
+    ln -sf libshill-net.so.${SO_VERSION} ${D}${libdir}/libshill-net.so
+
+    install -d ${D}${includedir}/shill/net
+    install -m 0644 ${S}/*.h ${D}${includedir}/shill/net/
+}
