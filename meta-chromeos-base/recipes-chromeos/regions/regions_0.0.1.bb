@@ -4,6 +4,8 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/region
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
+require recipes-chromeos/chromiumos-platform2/chromiumos-platform2.inc
+
 S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
 PR = "r2027"
@@ -32,7 +34,8 @@ GN_ARGS += ' \
 '
 
 do_compile() {
-    ./regions.py --format=json --output "${WORKDIR}/cros-regions.json" ${@bb.utils.contains('PACKAGECONFIG', 'crosdebug', '--include_pseudolocales', '', d)}
+    cd "${S}"
+    ./regions.py --format=json --output "${B}/cros-regions.json" ${@bb.utils.contains('PACKAGECONFIG', 'crosdebug', '--include_pseudolocales', '', d)}
 }
 
 FILES:${PN} += "${datadir}/misc"
