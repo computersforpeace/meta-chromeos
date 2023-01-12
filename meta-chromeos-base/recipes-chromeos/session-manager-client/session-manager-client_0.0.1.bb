@@ -54,11 +54,11 @@ do_install() {
 
     install -d ${D}${libdir}/pkgconfig
     sed \
-      -e "s|@INCLUDE_DIR@|${includedir}|g" \
+      -e "s|@INCLUDE_DIR@|${includedir}/${CHROMEOS_PN}|g" \
          "${S}/libsession_manager-client.pc.in" > "${D}${libdir}/pkgconfig/libsession_manager-client.pc"
 
      sed \
-       -e "s|@INCLUDE_DIR@|${includedir}|g" \
+       -e "s|@INCLUDE_DIR@|${includedir}/${CHROMEOS_PN}-test|g" \
           "${S}/libsession_manager-client-test.pc.in" > "${D}${libdir}/pkgconfig/libsession_manager-client-test.pc"
 }
 
