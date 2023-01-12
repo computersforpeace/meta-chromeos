@@ -1,9 +1,25 @@
 SUMMARY = "Virtual TPM service for Chromium OS"
 DESCRIPTION = "Virtual TPM service for Chromium OS"
 HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/vtpm/"
-LICENSE = "Apache-2.0"
+LICENSE = "BSD-3-Clause"
+LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+CHROMEOS_PN = "vtpm"
+
+inherit chromeos_gn platform
+
+DEPENDS:append = "\
+    attestation-client \
+    chromeos-dbus-bindings-native \
+    protobuf-native \
+    system-api \
+    tpm-manager \
+    trunks \
+"
+
+RDEPEND:${PN} += "\
+    attestation \
+"
 
 S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
@@ -24,19 +40,22 @@ PACKAGECONFIG ??= ""
 # Empty PACKAGECONFIG options listed here to avoid warnings.
 # The .bb file should use these to conditionally add patches,
 # command-line switches and dependencies.
+PACKAGECONFIG[cros_host] = ""
+PACKAGECONFIG[fuzzer] = ""
+PACKAGECONFIG[profiling] = ""
+PACKAGECONFIG[tcmalloc] = ""
 PACKAGECONFIG[test] = ""
 
 GN_ARGS += ' \
     use={ \
+        cros_host=${@bb.utils.contains('PACKAGECONFIG', 'cros_host', 'true', 'false', d)} \
+        fuzzer=${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} \
+        profiling=${@bb.utils.contains('PACKAGECONFIG', 'profiling', 'true', 'false', d)} \
+        tcmalloc=${@bb.utils.contains('PACKAGECONFIG', 'tcmalloc', 'true', 'false', d)} \
         test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
     } \
 '
 
-do_compile() {
-    ninja -C ${B}
-}
-
-do_install() {
-    :
-}
-
+#do_install() {
+# tmpfiles.d/vtpm.conf?
+#}
