@@ -4,13 +4,24 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/u2fd/c
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+inherit chromeos_gn platform
 
-S = "${WORKDIR}/src/platform2/${BPN}"
+CHROMEOS_PN = "u2fd/client"
+
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r60"
 
-GN_ARGS += 'platform_subdir="${BPN}"'
+DEPENDS:append = "\
+    libbrillo \
+    session-manager-client \
+    openssl \
+    protobuf \
+    protobuf-native \
+    system-api \
+"
+
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 PACKAGECONFIG ??= ""
 
@@ -27,21 +38,20 @@ PACKAGECONFIG ??= ""
 # command-line switches and dependencies.
 PACKAGECONFIG[fuzzer] = ""
 PACKAGECONFIG[cr50_onboard] = ""
+PACKAGECONFIG[cros_host] = ""
+PACKAGECONFIG[profiling] = ""
+PACKAGECONFIG[tcmalloc] = ""
 PACKAGECONFIG[ti50_onboard] = ""
+PACKAGECONFIG[test] = ""
 
 GN_ARGS += ' \
     use={ \
         fuzzer=${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} \
         cr50_onboard=${@bb.utils.contains('PACKAGECONFIG', 'cr50_onboard', 'true', 'false', d)} \
+        cros_host=${@bb.utils.contains('PACKAGECONFIG', 'cros_host', 'true', 'false', d)} \
+        profiling=${@bb.utils.contains('PACKAGECONFIG', 'profiling', 'true', 'false', d)} \
+        tcmalloc=${@bb.utils.contains('PACKAGECONFIG', 'tcmalloc', 'true', 'false', d)} \
         ti50_onboard=${@bb.utils.contains('PACKAGECONFIG', 'ti50_onboard', 'true', 'false', d)} \
+        test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
     } \
 '
-
-do_compile() {
-    ninja -C ${B}
-}
-
-do_install() {
-    :
-}
-
