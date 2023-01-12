@@ -6,13 +6,20 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 
 inherit chromeos_gn
 
-CHROMEOS_PN = "patchpanel"
+CHROMEOS_PN = "patchpanel/dbus"
 
-S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}/dbus"
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r342"
 
-GN_ARGS += 'platform_subdir="${CHROMEOS_PN}/dbus"'
+DEPENDS:append = "\
+    libbrillo \
+    libchrome \
+    system-api \
+    protobuf \
+"
+
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 PACKAGECONFIG ??= ""
 
@@ -27,19 +34,35 @@ PACKAGECONFIG ??= ""
 # Empty PACKAGECONFIG options listed here to avoid warnings.
 # The .bb file should use these to conditionally add patches,
 # command-line switches and dependencies.
+PACKAGECONFIG[arcvm] = ""
+PACKAGECONFIG[cros_host] = ""
 PACKAGECONFIG[fuzzer] = ""
+PACKAGECONFIG[profiling] = ""
+PACKAGECONFIG[tcmalloc] = ""
+PACKAGECONFIG[test] = ""
 
 GN_ARGS += ' \
     use={ \
+        arcvm=${@bb.utils.contains('PACKAGECONFIG', 'arcvm', 'true', 'false', d)} \
+        cros_host=${@bb.utils.contains('PACKAGECONFIG', 'cros_host', 'true', 'false', d)} \
         fuzzer=${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} \
+        profiling=${@bb.utils.contains('PACKAGECONFIG', 'profiling', 'true', 'false', d)} \
+        tcmalloc=${@bb.utils.contains('PACKAGECONFIG', 'tcmalloc', 'true', 'false', d)} \
+        test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
     } \
 '
 
-do_compile() {
-    ninja -C ${B} ${BPN}
-}
-
 do_install() {
-    :
-}
+    ( cd "${S}"; "${S}"/preinstall.sh ${PR} /usr/include/chromeos "${B}" )
+    install -d ${D}${libdir}/pkgconfig
+    install -m 0644 libpatchpanel-client.pc ${D}${libdir}/pkgconfig/
 
+    install -d ${D}${libdir}
+    install -m 0644 lib/libpatchpanel-client.so ${D}${libdir}/libpatchpanel-client.so.${SO_VERSION}
+    ln -sf libpatchpanel-client.so.${SO_VERSION} ${D}${libdir}/libpatchpanel-client.so
+
+    install -d ${D}${includedir}/chromeos/patchpanel/dbus
+    for i in client.h fake_client.h; do
+        sed '/.pb.h/! s:patchpanel/:chromeos/patchpanel/:g' "${S}/$i" > "${D}"/usr/include/chromeos/patchpanel/dbus/"$i"
+    done
+}
