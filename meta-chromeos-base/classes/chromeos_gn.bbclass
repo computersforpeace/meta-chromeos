@@ -53,6 +53,9 @@ BUILD_CPPFLAGS:append:runtime-llvm = " -isysroot=${STAGING_DIR_NATIVE} -stdlib=l
 # Use libgcc for native parts
 BUILD_LDFLAGS:append:runtime-llvm = " -rtlib=libgcc -unwindlib=libgcc -stdlib=libc++ -lc++abi -rpath ${STAGING_LIBDIR_NATIVE}"
 
+def to_gn_list(d, var):
+    return "[" + ",".join('"' + i + '"' for i in (d.getVar(var) or "").split()) + "]"
+
 # The options are in src/platform2/common-mk/BUILDCONFIG.gn
 # Toolchains we will use for the build. We need to point to the toolchain file
 # we've created, set the right target architecture and make sure we are not
@@ -64,6 +67,10 @@ GN_ARGS += ' \
     sysroot="${STAGING_DIR_TARGET}" \
     platform2_root="${WORKDIR}/src/platform2" \
     target_cpu="${@gn_target_arch_name(d)}" \
+    external_cflags=${@to_gn_list(d, 'CFLAGS')} \
+    external_cxxflags=${@to_gn_list(d, 'CXXFLAGS')} \
+    external_cppflags=${@to_gn_list(d, 'CPPFLAGS')} \
+    external_ldflags=${@to_gn_list(d, 'LDFLAGS')} \
 '
 
 chromeos_gn_do_configure() {
