@@ -6,6 +6,8 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 
 inherit chromeos_gn platform useradd
 
+CHROMEOS_PN = "${BPN}"
+
 SRC_URI += "\
     file://0001-HACK-attestation-Handle-proto-printing-deprecated-fi.patch \
 "
@@ -31,7 +33,7 @@ DEPENDS:append = " \
     vboot-reference \
 "
 
-S = "${WORKDIR}/src/platform2/${BPN}"
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r3611"
 
@@ -46,7 +48,7 @@ RDEPENDS:${PN} += " \
     attestation-client \
     "
 
-GN_ARGS += 'platform_subdir="${BPN}"'
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 PACKAGECONFIG ??= "\
     ${@bb.utils.filter("MACHINE_FEATURES", "tpm tpm2", d)} \
