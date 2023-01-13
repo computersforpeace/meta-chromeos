@@ -12,8 +12,6 @@ S = "${WORKDIR}/src/platform2/${BPN}"
 B = "${WORKDIR}/build"
 PR = "r3461"
 
-CXX:append = " -I${STAGING_INCDIR}/session_manager-client"
-
 SRC_URI:append = " \
     file://0001-metrics-metrics-daemon-static-cast.patch \
     file://0002-metrics-vmlog_writer-static-cast.patch \
