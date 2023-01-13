@@ -46,7 +46,7 @@ GN_ARGS = " \
 # binaries we need to run on the host, uses the right pkg-config to avoid
 # passing include directories belonging to the target.
 GN_ARGS += 'pkg_config="pkg-config"'
-GN_ARGS += 'libdir="${STAGING_LIBDIR}"'
+GN_ARGS += 'libdir="${libdir}"'
 
 # Use libcxx headers for native parts
 BUILD_CPPFLAGS:append:runtime-llvm = " -isysroot=${STAGING_DIR_NATIVE} -stdlib=libc++"

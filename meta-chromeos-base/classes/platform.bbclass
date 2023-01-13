@@ -7,7 +7,8 @@ def platform_install(d):
     import json
     import os
 
-    target = d.expand('${PN}')
+    # TODO: make CHROMEOS_PN mandatory?
+    target = d.getVar('CHROMEOS_PN') or d.getVar('PN')
 
     arch = d.expand('${TARGET_ARCH}')
     if arch == 'x86_64':
@@ -116,7 +117,7 @@ def platform_install(d):
                     install_path = d.expand("${libdir}")
                 for s in sources:
                     so_name = os.path.basename(s)
-                    so_name_ver = so_name + d.expand(".${SO_VERSION}")
+                    so_name_ver = so_name + "." + (d.getVar("SO_VERSION") or "1")
                     cmd_list += [
                         ['install', '-D', '-m', '0755', s, os.path.join(d.expand("${D}" + install_path), so_name_ver)],
                         ['ln', '-sf', so_name_ver, os.path.join(d.expand("${D}" + install_path), so_name)],
@@ -129,6 +130,10 @@ def platform_install(d):
     for cmd in cmd_list:
         bb.process.run(cmd)
 
+
+python platform_do_install() {
+    platform_install(d)
+}
 
 platform_install_dbus_client_lib() {
     libname=${1:-${PN}}
@@ -159,4 +164,4 @@ platform_install_dbus_client_lib() {
     fi
 }
 
-EXPORT_FUNCTIONS = "install_dbus_client_lib"
+EXPORT_FUNCTIONS install_dbus_client_lib platform_install do_install
