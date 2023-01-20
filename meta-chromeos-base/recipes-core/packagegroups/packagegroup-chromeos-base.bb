@@ -6,7 +6,33 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit packagegroup
 
+# Mostly from target-chromium-os.
 RDEPENDS:${PN} = "\
     chromeos-init \
-    libchromeos-ui \
+    chromeos-login \
+    kmod \
+    mosys \
+    regions \
+    rsyslog \
+    shill \
+    trunks \
+    u2fd \
+    vtpm \
+"
+# TODO: update-engine; need puffin, bsdiff.
+
+# From implicit-system.
+RDEPENDS:${PN} += "\
+    dash \
+    ca-certificates \
+    coreutils \
+    findutils \
+    grep \
+    gawk \
+    sed \
+    which \
+    procps \
+    net-tools \
+    shadow \
+    util-linux \
 "
