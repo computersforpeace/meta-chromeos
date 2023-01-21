@@ -101,4 +101,5 @@ do_install() {
 
 FILES:${PN} = "${bindir}"
 FILES:libchaps = "${libdir}/*"
+INSANE_SKIP:libchaps = "dev-so"
 PROVIDES += "libchaps"

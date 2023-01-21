@@ -148,10 +148,3 @@ do_install() {
         done
     done
 }
-
-FILES:${PN} = "${libdir}/*"
-
-FILES_SOLIBSDEV = ""
-INSANE_SKIP:${PN} += "dev-so"
-
-FILES:${PN}-dev = "${includedir}/*"

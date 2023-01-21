@@ -12,6 +12,13 @@ DEPENDS += " \
     ninja-native \
 "
 
+# Per poky/documentation/dev-manual/common-tasks.rst
+# Yocto Library Packaging Overview, except including both '.so' and '.so.*' via
+# just '.so*'
+SOLIBS = ".so*"
+FILES_SOLIBSDEV = ""
+INSANE_SKIP:${PN} = "dev-so"
+
 # Borrowed from meta-chromium
 
 DEPEND:append:runtime-llvm = " compiler-rt-native libcxx-native"

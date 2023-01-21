@@ -179,11 +179,5 @@ do_install() {
     cd ${oldpwd}
 }
 
-FILES:${PN} = "${libdir}/libsystem_api.so* ${libdir}/pkgconfig/*"
-
-FILES_SOLIBSDEV = ""
-INSANE_SKIP:${PN} += "dev-so"
-
-FILES:${PN}-dev = "${includedir}/*"
 FILES:${PN}-staticdev += "${libdir}/*.a"
 FILES:${PN}-src += "${prefix}/src/go/chromiumos/system_api/*"
