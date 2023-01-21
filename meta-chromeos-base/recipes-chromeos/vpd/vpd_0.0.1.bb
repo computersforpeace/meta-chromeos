@@ -4,14 +4,19 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform/vpd/"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
-require recipes-chromeos/chromiumos-platform/chromiumos-platform-${BPN}.inc
+inherit pkgconfig
 
-S = "${WORKDIR}/src/platform/${BPN}"
-B = "${WORKDIR}/build"
-PR = "r150"
+SRC_URI += " \
+    git://chromium.googlesource.com/chromiumos/platform/vpd;protocol=https;branch=main \
+"
+SRCREV = "256955cdec97e1fc3b99e8af1723e033690526f4"
 
-GN_ARGS += 'platform_subdir="../platform/${BPN}"'
+DEPENDS:append = "\
+    util-linux \
+"
+
+S = "${WORKDIR}/git"
+PR = "r155"
 
 PACKAGECONFIG ??= ""
 
@@ -29,18 +34,13 @@ PACKAGECONFIG ??= ""
 PACKAGECONFIG[static] = ""
 PACKAGECONFIG[systemd] = ""
 
-GN_ARGS += ' \
-    use={ \
-        static=${@bb.utils.contains('PACKAGECONFIG', 'static', 'true', 'false', d)} \
-        systemd=${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} \
-    } \
-'
-
 do_compile() {
-    ninja -C ${B} ${BPN}
+    oe_runmake vpd # TODO: also vpd_s and vpd_test? i.e., 'all'
 }
 
 do_install() {
-    :
+    install -d "${D}${sbindir}"
+    install -m 0755 vpd "${D}${sbindir}/"
+    # TODO: more; init files? static?
 }
 
