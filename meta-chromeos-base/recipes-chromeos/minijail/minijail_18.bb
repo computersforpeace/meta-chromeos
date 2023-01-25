@@ -57,8 +57,8 @@ do_install() {
     install -d ${D}${libdir}/pkgconfig
     install -m 0644 ${B}/libminijail.pc ${D}${libdir}/pkgconfig/
 
-    install -d ${D}${bindir}
-    install -m 0755 ${B}/minijail0 ${D}${bindir}
+    install -d ${D}${base_sbindir}
+    install -m 0755 ${B}/minijail0 ${D}${base_sbindir}
 
     install -d ${D}${includedir}/chromeos
     install -m 0644 ${S}/libminijail.h ${D}${includedir}/chromeos/
@@ -70,7 +70,7 @@ do_install() {
 # looking for.
 INSANE_SKIP:libminijail += "dev-so"
 
-FILES:${PN} = "${bindir}"
+FILES:${PN} = "${base_sbindir}"
 FILES:libminijail = "${libdir}/*"
 PROVIDES += "libminijail"
 RPROVIDES:libminijail += "libminijail.so()(64bit)"
