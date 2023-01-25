@@ -246,7 +246,7 @@ do_install() {
     # Install Upstart scripts.
     src_install_upstart
 
-    install -m 0644 ${S}/${@bb.utils.contains('PACKAGECONFIG', 'encrypted_stateful', 'encrypted_stateful', 'unencrypted_stateful', d)}/startup_utils.sh ${D}${base_sbindir}
+    install -m 0644 ${S}/${@bb.utils.contains('PACKAGECONFIG', 'encrypted_stateful', 'encrypted_stateful', 'unencrypted_stateful', d)}/startup_utils.sh ${D}${datadir}/cros/
 
     # Install LVM conf files.
     install -d ${D}${sysconfdir}/lvm
