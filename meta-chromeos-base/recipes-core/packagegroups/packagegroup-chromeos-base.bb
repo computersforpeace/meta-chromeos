@@ -32,6 +32,9 @@ RDEPENDS:${PN} = "\
 # To get kernel modules:
 RDEPENDS:${PN} += "kernel-modules"
 
+# HACK: probably needs to be generated and included by some other means.
+RDEPENDS:${PN} += "write-gpt"
+
 # From implicit-system.
 RDEPENDS:${PN} += "\
     dash \
