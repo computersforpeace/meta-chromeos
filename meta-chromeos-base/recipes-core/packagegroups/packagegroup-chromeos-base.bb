@@ -8,15 +8,23 @@ inherit packagegroup
 
 # Mostly from target-chromium-os.
 RDEPENDS:${PN} = "\
+    bash \
     chromeos-init \
     chromeos-login \
+    e2fsprogs \
+    iproute2 \
     kmod \
     mosys \
+    permission-broker \
     regions \
     rsyslog \
     shill \
+    tar \
     trunks \
     u2fd \
+    udev \
+    vboot-reference \
+    vpd \
     vtpm \
 "
 # TODO: update-engine; need puffin, bsdiff.
