@@ -14,3 +14,5 @@ COMPATIBLE_MACHINE:volteer = "volteer"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 SRC_URI += "file://chromiumos-x86_64.cfg"
+
+KERNEL_SPLIT_MODULES = "0"

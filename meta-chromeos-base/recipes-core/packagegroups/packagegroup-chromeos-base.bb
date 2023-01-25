@@ -29,6 +29,9 @@ RDEPENDS:${PN} = "\
 "
 # TODO: update-engine; need puffin, bsdiff.
 
+# To get kernel modules:
+RDEPENDS:${PN} += "kernel-modules"
+
 # From implicit-system.
 RDEPENDS:${PN} += "\
     dash \
