@@ -6,6 +6,7 @@ create_rootfs_dirs() {
     mkdir -p \
         ${IMAGE_ROOTFS}/mnt/stateful_partition \
         ${IMAGE_ROOTFS}/mnt/empty \
+        ${IMAGE_ROOTFS}/usr/local \
         ${IMAGE_ROOTFS}/home/chronos
 }
 IMAGE_PREPROCESS_COMMAND += "create_rootfs_dirs;"
