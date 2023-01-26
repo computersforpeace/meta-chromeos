@@ -4,7 +4,11 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/config/"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+# TODO / HACK: these are hard-coded config files for an amd64 VM.
+SRC_URI += "file://configfs.img"
+SRC_URI += "file://config.yaml"
+SRC_URI += "file://identity.bin"
+
 PR = "r192"
 
 RDEPENDS:${PN} += "crosid"
@@ -24,17 +28,15 @@ PACKAGECONFIG ??= ""
 # command-line switches and dependencies.
 PACKAGECONFIG[zephyr_poc] = ""
 
-GN_ARGS += ' \
-    use={ \
-        zephyr_poc=${@bb.utils.contains('PACKAGECONFIG', 'zephyr_poc', 'true', 'false', d)} \
-    } \
-'
-
 do_compile() {
-    ninja -C ${B}
+    :
 }
 
 do_install() {
-    :
+    install -d "${D}${datadir}/chromeos-config/yaml"
+
+    install -m 0644 "${WORKDIR}"/configfs.img "${D}${datadir}/chromeos-config/"
+    install -m 0644 "${WORKDIR}"/identity.bin "${D}${datadir}/chromeos-config/"
+    install -m 0644 "${WORKDIR}"/config.yaml "${D}${datadir}/chromeos-config/yaml/"
 }
 

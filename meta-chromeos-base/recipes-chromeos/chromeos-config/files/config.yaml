@@ -1,0 +1,21 @@
+{
+  "chromeos": {
+    "configs": [
+      {
+        "arc": {
+          "build-properties": {
+            "device": "betty_cheets",
+            "marketing-name": "betty",
+            "metrics-tag": "betty",
+            "product": "betty"
+          }
+        },
+        "brand-code": "ZZCR",
+        "identity": {
+          "platform-name": "Generic"
+        },
+        "name": "betty"
+      }
+    ]
+  }
+}
