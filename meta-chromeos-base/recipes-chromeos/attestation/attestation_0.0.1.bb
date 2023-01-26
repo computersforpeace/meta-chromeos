@@ -45,7 +45,6 @@ RDEPENDS:${PN} += " \
     metrics \
     minijail \
     tpm-manager \
-    attestation-client \
     "
 
 GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
@@ -129,4 +128,5 @@ python do_install() {
     bb.build.exec_func('other_install', d)
 }
 
+RPROVIDES:${PN} += "libattestation.so()(64bit)"
 FILES:${PN}-dev += "${includedir}/attestation/common/*.h"

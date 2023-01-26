@@ -6,9 +6,9 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 
 inherit chromeos_gn platform
 
-CHROMEOS_PN = "attestation"
+CHROMEOS_PN = "attestation/client"
 
-S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}/client"
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r507"
 
@@ -16,7 +16,7 @@ DEPENDS += "chromeos-dbus-bindings-native libbrillo system-api"
 
 RDEPENDS:${PN} += "attestation libbrillo"
 
-GN_ARGS += 'platform_subdir="${CHROMEOS_PN}/client"'
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 PACKAGECONFIG ??= ""
 
@@ -39,12 +39,12 @@ GN_ARGS += ' \
     } \
 '
 
-do_compile() {
-    ninja -C ${B}
-}
-
-do_install() {
+other_install() {
     # Install D-Bus client library
     platform_install_dbus_client_lib "attestation"
 }
 
+python do_install() {
+    platform_install(d)
+    bb.build.exec_func('other_install', d)
+}
