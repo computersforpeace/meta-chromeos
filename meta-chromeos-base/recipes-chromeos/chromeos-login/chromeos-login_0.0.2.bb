@@ -4,7 +4,9 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/login_
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+inherit chromeos_gn useradd
+
+USERADD_PACKAGES = "${PN}"
 
 CHROMEOS_PN = "login_manager"
 
@@ -123,3 +125,6 @@ do_install() {
     # Create daemon store directories.
     install -d -m 0700 ${D}${sysconfdir}/daemon-store/session_manager
 }
+
+GROUPADD_PARAM:${PN} = "-g 303 policy-readers"
+# TODO: add users - users:attestation,authpolicyd,chronos,hardware_verifier,secagentd,shill,u2f
