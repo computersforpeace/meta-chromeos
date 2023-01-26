@@ -30,7 +30,10 @@ DEPENDS:append = " \
     vboot-reference \
 "
 
-RDEPENDS:${PN} += "libminijail"
+RDEPENDS:${PN} += "\
+    cryptohome \
+    libminijail \
+"
 
 S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"

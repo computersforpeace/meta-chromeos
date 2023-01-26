@@ -43,6 +43,10 @@ DEPENDS:append = " \
     vboot-reference \
 "
 
+RDEPENDS:${PN} += "\
+    attestation \
+"
+
 GN_ARGS += 'platform_subdir="${BPN}"'
 
 PACKAGECONFIG ??= "${@bb.utils.filter('DISTRO_FEATURES', 'systemd', d)} device_mapper"
