@@ -16,7 +16,7 @@ DEPENDS:append = " libbrillo libchrome"
 
 GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
-PACKAGECONFIG ??= ""
+PACKAGECONFIG ??= "unibuild"
 
 # Description of all the possible PACKAGECONFIG fields (comma delimited):
 # 1. Extra arguments that should be added to the configure script argument list (EXTRA_OECONF or PACKAGECONFIG_CONFARGS) if the feature is enabled.

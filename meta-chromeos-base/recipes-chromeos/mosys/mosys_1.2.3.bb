@@ -24,7 +24,7 @@ RDEPENDS:${PN} = "\
     libminijail \
 "
 
-PACKAGECONFIG ??= ""
+PACKAGECONFIG ??= "unibuild"
 
 # Description of all the possible PACKAGECONFIG fields (comma delimited):
 # 1. Extra arguments that should be added to the configure script argument list (EXTRA_OECONF or PACKAGECONFIG_CONFARGS) if the feature is enabled.
@@ -36,7 +36,7 @@ PACKAGECONFIG ??= ""
 # Empty PACKAGECONFIG options listed here to avoid warnings.
 # The .bb file should use these to conditionally add patches,
 # command-line switches and dependencies.
-PACKAGECONFIG[unibuild] = ""
+PACKAGECONFIG[unibuild] = ",,,chromeos-config"
 #PACKAGECONFIG[${PLATFORM_NAME_USE_FLAGS[*]}] = ""
 
 GN_ARGS += ' \
