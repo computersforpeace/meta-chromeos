@@ -63,6 +63,20 @@ do_compile() {
 }
 
 do_install() {
-    :
-}
+    install -d "${D}${sysconfdir}/dbus-1/system.d"
+    install -m 0644 "${S}/server/org.chromium.TpmManager.conf" "${D}${sysconfdir}/dbus-1/system.d/"
 
+    install -d "${D}${sysconfdir}"
+    install -m 0644 "${S}/server/tpm_managerd.conf" "${D}${sysconfdir}/"
+    # TODO tpm_dynamic vs tpm2
+
+    install -d "${D}${sbindir}"
+    install -m 0755 tpm_managerd "${D}${sbindir}/"
+    install -m 0755 local_data_migration "${D}${sbindir}/"
+
+    install -d "${D}${datadir}/policy"
+    ARCH=${TARGET_ARCH}
+    [ "${ARCH}" = x86_64 ] && ARCH=amd64
+    install -m 0644 "${S}/server/tpm_managerd-seccomp-${ARCH}.policy" "${D}${datadir}/policy/tpm_managerd-seccomp.policy"
+}
+FILES:${PN} += "${datadir}/policy"
