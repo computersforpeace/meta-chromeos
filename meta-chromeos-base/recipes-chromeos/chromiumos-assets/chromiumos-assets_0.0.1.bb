@@ -4,21 +4,20 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform/chromiumos-ass
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
 require recipes-chromeos/chromiumos-platform/chromiumos-platform-${BPN}.inc
 
 S = "${WORKDIR}/src/platform/${BPN}"
 B = "${WORKDIR}/build"
-PR = "r15"
-
-GN_ARGS += 'platform_subdir="../platform/${BPN}"'
-
-
-do_compile() {
-    ninja -C ${B} ${BPN}
-}
+PR = "r16"
 
 do_install() {
-    :
-}
+    install -d "${D}${datadir}/chromeos-assets/images"
+    install -m 0644 "${S}"/images/* "${D}${datadir}/chromeos-assets/images/"
 
+    install -d "${D}${datadir}/chromeos-assets/images_100_percent"
+    install -m 0644 "${S}"/images_100_percent/* "${D}${datadir}/chromeos-assets/images_100_percent/"
+
+    install -d "${D}${datadir}/chromeos-assets/images_200_percent"
+    install -m 0644 "${S}"/images_200_percent/* "${D}${datadir}/chromeos-assets/images_200_percent/"
+}
+FILES:${PN} += "${datadir}/chromeos-assets"

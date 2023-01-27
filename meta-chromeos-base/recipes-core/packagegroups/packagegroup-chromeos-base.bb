@@ -11,6 +11,7 @@ RDEPENDS:${PN} = "\
     bash \
     chromeos-init \
     chromeos-login \
+    chromiumos-assets \
     e2fsprogs \
     iproute2 \
     kmod \
