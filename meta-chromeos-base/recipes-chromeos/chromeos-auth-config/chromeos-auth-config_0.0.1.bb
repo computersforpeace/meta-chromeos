@@ -47,6 +47,9 @@ do_install() {
     echo "password	include	system-local-login" >> ${D}${sysconfdir}/pam.d/login
     echo "session	include	system-local-login" >> ${D}${sysconfdir}/pam.d/login
 
+    # TODO: reconcile this an shadow-base.
+    rm "${D}${sysconfdir}/pam.d/login"
+
     install -d ${D}${bindir}
     install -m 0755 ${S}/files/is_developer_end_user ${D}${bindir}
 }

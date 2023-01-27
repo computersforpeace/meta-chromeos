@@ -9,6 +9,7 @@ inherit packagegroup
 # Mostly from target-chromium-os.
 RDEPENDS:${PN} = "\
     bash \
+    chromeos-auth-config \
     chromeos-init \
     chromeos-login \
     chromiumos-assets \
