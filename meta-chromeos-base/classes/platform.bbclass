@@ -108,6 +108,11 @@ def platform_install(d):
                 cmd_list += [['install', '-D', '-m', '0644', '-t', d.expand("${D}") + install_path] + sources]
             elif command_type == "executable":
                 pass
+            elif command_type == "static_library":
+                if install_path != "lib":
+                    bb.fatal('Unimplemented shared library path: %s' % install_path)
+                install_path = d.expand("${libdir}")
+                cmd_list += [['install', '-D', '-m', '0755', '-t', d.expand('${D}') + install_path] + sources]
             elif command_type == "shared_library":
                 #for s, o in zip(sources, outputs):
                     #if o == "lib":
