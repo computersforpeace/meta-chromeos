@@ -4,20 +4,22 @@ HOMEPAGE = "https://chromium.googlesource.com/chromiumos/platform2/+/main/ml/"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+inherit chromeos_gn platform
 
-S = "${WORKDIR}/src/platform2/${BPN}"
+CHROMEOS_PN = "ml/ml-client"
+
+# go-generate-chromeos-dbus-bindings is provided by chromeos-dbus-bindings-native
+DEPENDS:append = "\
+    chromeos-dbus-bindings-native \
+"
+
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r196"
 
-GN_ARGS += 'platform_subdir="${BPN}"'
-
-
-do_compile() {
-    ninja -C ${B}
-}
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 do_install() {
-    :
+    platform_install_dbus_client_lib "ml"
 }
 
