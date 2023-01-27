@@ -46,6 +46,7 @@ RDEPENDS:${PN} += "e2fsprogs"
 PACKAGECONFIG ??= "\
     ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd', 'upstart', d)} \
     ${@bb.utils.filter('MACHINE_FEATURES', 'tpm2', d)} \
+    frecon \
     syslog \
     vtconsole"
 
