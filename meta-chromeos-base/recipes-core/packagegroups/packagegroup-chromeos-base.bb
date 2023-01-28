@@ -18,6 +18,7 @@ RDEPENDS:${PN} = "\
     kmod \
     mosys \
     permission-broker \
+    power-manager \
     regions \
     rsyslog \
     shill \

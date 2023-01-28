@@ -8,7 +8,34 @@ inherit chromeos_gn
 
 CHROMEOS_PN = "power_manager"
 
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
+B = "${WORKDIR}/build"
 PR = "r4312"
+
+CXXFLAGS:append = " -Wno-error=implicit-int-float-conversion"
+
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
+
+# dbusxx-xml2cpp is provided by libdbus-c++-native
+# protoc is provided by protbuf-native
+# protoc-gen-go is provided by github.com-golang-protobuf-native
+# go-generate-chromeos-dbus-bindings is provided by chromeos-dbus-bindings-native
+DEPENDS:append = "\
+    libbrillo \
+    libchrome \
+    metrics \
+    shill-client \
+    shill-dbus-client \
+    chromeos-config-tools \
+    libec \
+    ml-client \
+    eudev \
+    system-api \
+    protobuf \
+    re2 \
+    tpm-manager-client \
+    libnl \
+"
 
 PACKAGECONFIG ??= ""
 
@@ -24,9 +51,11 @@ PACKAGECONFIG ??= ""
 # The .bb file should use these to conditionally add patches,
 # command-line switches and dependencies.
 PACKAGECONFIG[als] = ""
+PACKAGECONFIG[amd64] = ""
 PACKAGECONFIG[cellular] = ""
 PACKAGECONFIG[cras] = ""
 PACKAGECONFIG[cros_embedded] = ""
+PACKAGECONFIG[cros_host] = ""
 PACKAGECONFIG[display_backlight] = ""
 PACKAGECONFIG[fuzzer] = ""
 PACKAGECONFIG[has_keyboard_backlight] = ""
@@ -36,7 +65,10 @@ PACKAGECONFIG[keyboard_convertible_no_side_buttons] = ""
 PACKAGECONFIG[legacy_power_button] = ""
 PACKAGECONFIG[powerd_manual_eventlog_add] = ""
 PACKAGECONFIG[powerknobs] = ""
+PACKAGECONFIG[profiling] = ""
 PACKAGECONFIG[systemd] = ""
+PACKAGECONFIG[tcmalloc] = ""
+PACKAGECONFIG[test] = ""
 PACKAGECONFIG[touchpad_wakeup] = ""
 PACKAGECONFIG[touchscreen_wakeup] = ""
 PACKAGECONFIG[unibuild] = ""
@@ -46,9 +78,11 @@ PACKAGECONFIG[qrtr] = ""
 GN_ARGS += ' \
     use={ \
         als=${@bb.utils.contains('PACKAGECONFIG', 'als', 'true', 'false', d)} \
+        amd64=${@bb.utils.contains('PACKAGECONFIG', 'als', 'true', 'false', d)} \
         cellular=${@bb.utils.contains('PACKAGECONFIG', 'cellular', 'true', 'false', d)} \
         cras=${@bb.utils.contains('PACKAGECONFIG', 'cras', 'true', 'false', d)} \
         cros_embedded=${@bb.utils.contains('PACKAGECONFIG', 'cros_embedded', 'true', 'false', d)} \
+        cros_host=${@bb.utils.contains('PACKAGECONFIG', 'cros_host', 'true', 'false', d)} \
         display_backlight=${@bb.utils.contains('PACKAGECONFIG', 'display_backlight', 'true', 'false', d)} \
         fuzzer=${@bb.utils.contains('PACKAGECONFIG', 'fuzzer', 'true', 'false', d)} \
         has_keyboard_backlight=${@bb.utils.contains('PACKAGECONFIG', 'has_keyboard_backlight', 'true', 'false', d)} \
@@ -58,7 +92,10 @@ GN_ARGS += ' \
         legacy_power_button=${@bb.utils.contains('PACKAGECONFIG', 'legacy_power_button', 'true', 'false', d)} \
         powerd_manual_eventlog_add=${@bb.utils.contains('PACKAGECONFIG', 'powerd_manual_eventlog_add', 'true', 'false', d)} \
         powerknobs=${@bb.utils.contains('PACKAGECONFIG', 'powerknobs', 'true', 'false', d)} \
+        profiling=${@bb.utils.contains('PACKAGECONFIG', 'profiling', 'true', 'false', d)} \
         systemd=${@bb.utils.contains('PACKAGECONFIG', 'systemd', 'true', 'false', d)} \
+        tcmalloc=${@bb.utils.contains('PACKAGECONFIG', 'tcmalloc', 'true', 'false', d)} \
+        test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
         touchpad_wakeup=${@bb.utils.contains('PACKAGECONFIG', 'touchpad_wakeup', 'true', 'false', d)} \
         touchscreen_wakeup=${@bb.utils.contains('PACKAGECONFIG', 'touchscreen_wakeup', 'true', 'false', d)} \
         unibuild=${@bb.utils.contains('PACKAGECONFIG', 'unibuild', 'true', 'false', d)} \
@@ -67,11 +104,45 @@ GN_ARGS += ' \
     } \
 '
 
-do_compile() {
-    ninja -C ${B} ${CHROMEOS_PN}
-}
-
 do_install() {
-    :
-}
+    install -d "${D}${bindir}"
 
+    install -m 0755 \
+        backlight_tool \
+        cpufreq_config \
+        dump_power_status \
+        powerd \
+        powerd_setuid_helper \
+        power_supply_info \
+        set_cellular_transmit_power \
+        set_wifi_transmit_power \
+        check_powerd_config \
+        inject_powerd_input_event \
+        powerd_dbus_suspend \
+        send_debug_power_status \
+        set_power_policy \
+        suspend_delay_sample \
+        "${D}${bindir}/"
+
+    #scripts
+    #scripts for testing and debugging
+    #more
+
+    install -d "${D}${datadir}/cros/init"
+    install -m 0755 "${S}/tools/temp_logger.sh" "${D}${datadir}/cros/init/"
+
+    install -d "${D}${sysconfdir}/dbus-1/system.d"
+    install -m 0644 "${S}"/dbus/org.chromium.PowerManager.conf "${D}${sysconfdir}/dbus-1/system.d/"
+
+    # udev scripts and rules.
+    install -d "${D}/lib/udev/rules.d"
+    install -m 0755 "${S}"/udev/*.sh "${D}/lib/udev/"
+    install -m 0644 "${S}"/udev/*.rules "${D}/lib/udev/rules.d/"
+
+    install -d "${D}${sysconfdir}/init"
+    install -m 0644 "${S}"/init/upstart/*.conf "${D}${sysconfdir}/init/"
+
+    install -d "${D}${datadir}/cros/init"
+    install -m 0755 "${S}"/init/shared/powerd-pre-start.sh "${D}${datadir}/cros/init/"
+}
+FILES:${PN} += "${datadir}/cros/init"
