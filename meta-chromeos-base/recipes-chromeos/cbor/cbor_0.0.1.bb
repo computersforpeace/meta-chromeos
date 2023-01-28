@@ -7,13 +7,15 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 inherit chromeos_gn
 require recipes-chromeos/chromiumos-platform/chromiumos-platform-${BPN}.inc
 
-S = "${WORKDIR}/src/platform/${BPN}"
+CHROMEOS_PN = "cbor"
+
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r217"
 
 DEPENDS:append = " libchrome"
 
-GN_ARGS += 'platform_subdir="../platform/${BPN}"'
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 PACKAGECONFIG ??= ""
 
@@ -43,12 +45,6 @@ GN_ARGS += ' \
         test=${@bb.utils.contains('PACKAGECONFIG', 'test', 'true', 'false', d)} \
     } \
 '
-
-CXX:append = " -I${S}/.."
-
-do_compile() {
-    ninja -C ${B}
-}
 
 export SO_VERSION="1"
 
