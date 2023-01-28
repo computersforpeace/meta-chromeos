@@ -1,0 +1,61 @@
+From 52f33fee8b81fa585ddafd9dd4266f27e30beca9 Mon Sep 17 00:00:00 2001
+From: Brian Norris <briannorris@chromium.org>
+Date: Mon, 1 Aug 2022 14:10:56 -0700
+Subject: [PATCH] Mojo: Update to python3 shebang
+
+Some of these scripts are used externally (e.g., by ChromeOS). Debian
+doesn't provide a 'python' at all these days, and we really expect to be
+using python3 (e.g., https://crrev.com/c/3205166), so spell it out
+properly.
+
+TEST=vpython3 mojo/public/tools/run_all_python_unittests.py
+TEST=ChromeOS platform2 hooks (check_stable_mojom_compatibility.py)
+
+Change-Id: Iffd19004e2fa5a23a69cc9e9006fcbfb81c4fbf7
+Bug: none
+Reviewed-on: https://chromium-review.googlesource.com/c/chromium/src/+/3803587
+Commit-Queue: Brian Norris <briannorris@chromium.org>
+Reviewed-by: Ken Rockot <rockot@google.com>
+Cr-Commit-Position: refs/heads/main@{#1030267}
+
+
+CrOS-Libchrome-Original-Commit: 4712a102f170699ca24c232c01079616d906a029
+---
+ mojo/public/tools/mojom/check_stable_mojom_compatibility.py     | 2 +-
+ .../tools/mojom/check_stable_mojom_compatibility_unittest.py    | 2 +-
+ mojo/public/tools/mojom/mojom_parser.py                         | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/mojo/public/tools/mojom/check_stable_mojom_compatibility.py b/mojo/public/tools/mojom/check_stable_mojom_compatibility.py
+index d91dc1464691..0255427ca143 100755
+--- a/mojo/public/tools/mojom/check_stable_mojom_compatibility.py
++++ b/mojo/public/tools/mojom/check_stable_mojom_compatibility.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2020 The Chromium Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/mojo/public/tools/mojom/check_stable_mojom_compatibility_unittest.py b/mojo/public/tools/mojom/check_stable_mojom_compatibility_unittest.py
+index 41539a11c5c8..887e2395f813 100755
+--- a/mojo/public/tools/mojom/check_stable_mojom_compatibility_unittest.py
++++ b/mojo/public/tools/mojom/check_stable_mojom_compatibility_unittest.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2020 The Chromium Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/mojo/public/tools/mojom/mojom_parser.py b/mojo/public/tools/mojom/mojom_parser.py
+index 2994d2cece88..cbce1d948ef9 100755
+--- a/mojo/public/tools/mojom/mojom_parser.py
++++ b/mojo/public/tools/mojom/mojom_parser.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2020 The Chromium Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+-- 
+2.39.1.456.gfc5497dd1b-goog
+

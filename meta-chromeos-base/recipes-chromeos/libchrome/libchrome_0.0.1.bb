@@ -4,24 +4,27 @@ HOMEPAGE="http://dev.chromium.org/chromium-os/packages/libchrome"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1da2c106782397de85224e6e6bc"
 
-inherit chromeos_gn
+inherit chromeos_gn platform
 require recipes-chromeos/chromiumos-platform/chromiumos-platform-${BPN}.inc
+
+CHROMEOS_PN = "libchrome"
 
 DEPENDS:append = " python3-native abseil-cpp glib-2.0 libevent gtest modp-b64 double-conversion re2"
 
-S = "${WORKDIR}/src/platform/libchrome"
+S = "${WORKDIR}/src/platform2/libchrome"
 B = "${WORKDIR}/build"
 PR = "r410"
 
 CC:append = " -I${STAGING_INCDIR}"
 CPP:append = " -I${STAGING_INCDIR}"
 CXX:append = " -I${STAGING_INCDIR}"
+CXXFLAGS:append = " -Wno-error=implicit-int-float-conversion"
 
 # Unused patches to port to OpenSSL 3.0
 # file://0013-libchrome-crypto-secure_hash-port-to-EVP.patch
 # file://0014-libchrome-crypto-scoped_openssl_types-drop-deprecated.patch
 SRC_URI += " \
-    gitsm://chromium.googlesource.com/linux-syscall-support;protocol=https;branch=main;destsuffix=src/platform/libchrome/third_party/lss;name=lss \
+    gitsm://chromium.googlesource.com/linux-syscall-support;protocol=https;branch=main;destsuffix=src/platform2/libchrome/third_party/lss;name=lss \
     file://0001-libchrome-base-hash-md5.h-include-string.h.patch \
     file://0002-libchrome-base-metrics-histogram-double_t.patch \
     file://0003-libchrome-base-metrics-histogram-static_cast.patch \
@@ -34,7 +37,8 @@ SRC_URI += " \
     file://0010-libchrome-crypto-nss_util-use-nss3-nss.h-path.patch \
     file://0011-libchrome-crypto-p224_spoke-include-string.h.patch \
     file://0012-libchrome-crypto-scoped_nss_types-fix-nss.h-path.patch \
-    "
+    file://0015-Mojo-Update-to-python3-shebang.patch \
+"
 
 SRCREV_lss = "92a65a8f5d705d1928874420c8d0d15bde8c89e5"
 
@@ -53,6 +57,9 @@ libchrome_do_patch() {
         patch -p0 <${S}/libchrome_tools/patches/${f} || \
         patch -p1 <${S}/libchrome_tools/patches/${f}
     done
+
+    # CrOS SDK currently ships a python==python3 to hide problems like this:
+    sed -i 's:/usr/bin/env python$:/usr/bin/env python3:' "${S}"/mojo/public/tools/bindings/mojom_bindings_generator.py
 }
 
 do_unpack[cleandirs] += "${S}"
@@ -94,7 +101,7 @@ PACKAGECONFIG[test] = ""
 PACKAGECONFIG[ubsan] = ""
 
 
-GN_ARGS += 'platform_subdir="../platform/${BPN}"'
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 
 GN_ARGS += ' \
     use={ \
@@ -115,19 +122,27 @@ GN_ARGS += ' \
     } \
 '
 
-do_compile() {
-    # FIXME: this should really be without ${BPN} but fails currently
-    # ninja: error: '../src/platform/libchrome/mojo/public/cpp/base/file.typemap',
-    # needed by 'gen/ABS_PATH/.../src/platform/libchrome/mojom_type_mappings_typemapping',
-    # missing and no known rule to make it
-    ninja -C ${B} ${BPN}
-}
-
 export SO_VERSION="1"
 
-do_install() {
+# Like portage recursive doins.
+doins_r() {
+    target_dir="$1"
+    shift
+    for s in "$@"; do
+        if [ -f "${s}" ]; then
+            install -D -m 0644 "${s}" "${target_dir}/$(basename "${s}")"
+            continue
+        fi
+
+        find "$s" -depth -type f -printf '%P\0' | while read -d $'\0' f; do
+            install -D -m 0644 "${s}/${f}" "${target_dir}/$(basename "${s}")/${f}"
+        done
+    done
+}
+
+other_install() {
     install -d ${D}${libdir}
-    find ${B}${base_libdir} -type f -name lib*.so | while read f; do
+    find "${B}${base_libdir}" -type f -name "lib*.so" -print0 | while read -d $'\0' f; do
         fn=$(basename ${f})
         echo ${fn}
         install -m 0755 ${f} ${D}${libdir}/${fn}.${SO_VERSION}
@@ -135,8 +150,7 @@ do_install() {
     done
 
     install -d ${D}${libdir}/pkgconfig
-    PKGCONFIGS=$(find ${B} -name *.pc)
-    for pkgconfig in $PKGCONFIGS; do
+    find "${B}" -name "*.pc" -print0 | while read -d $'\0' pkgconfig; do
 	install -m 0644 $pkgconfig ${D}${libdir}/pkgconfig/
     done
 
@@ -147,4 +161,37 @@ do_install() {
             install -D -m 0644 ${S}/${f} ${D}${includedir}/libchrome/${f}
         done
     done
+
+    # TODO: more libmojo files to install?
+    if ${@bb.utils.contains('PACKAGECONFIG', 'mojo', 'true', 'false', d)}; then
+        doins_r "${D}"/usr/src/libmojo/mojo \
+            "${S}/mojo/public/tools/bindings"/* \
+            "${S}/mojo/public/tools/mojom"/* \
+            "${S}/build/gn_helpers.py" \
+            "${S}/build/android/gyp/util" \
+            "${S}/build/android/pylib"
+
+        doins_r "${D}/usr/src/libmojo/third_party" \
+            "${S}/third_party/jinja2" \
+            "${S}/third_party/markupsafe" \
+            "${S}/third_party/ply"
+
+        for f in \
+              mojo/public/tools/bindings/generate_type_mappings.py \
+              mojo/public/tools/bindings/mojom_bindings_generator.py \
+              mojo/public/tools/mojom/mojom_parser.py; do
+            install -m 0755 "${S}/${f}" "${D}/usr/src/libmojo/mojo/"
+        done
+
+        for d in mojo/public/interfaces/bindings mojo/public/mojom/base; do
+            install -d "${D}/usr/include/libchrome/${d}"
+            install -m 0644 "${B}"/gen/include/"${d}"/*.h "${D}/usr/include/libchrome/${d}"
+        done
+    fi
 }
+
+python do_install:append() {
+    bb.build.exec_func('other_install', d)
+}
+FILES:${PN}-dev += "/usr/src/libmojo"
+SYSROOT_DIRS += "/usr/src/libmojo"

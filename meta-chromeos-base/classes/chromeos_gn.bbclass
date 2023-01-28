@@ -71,6 +71,8 @@ GN_ARGS += ' \
     cxx="${CXX}" \
     cc="${CC}" \
     ar="${AR}" \
+    build_root="${WORKDIR}/build" \
+    libbase_ver="0xDEADBEEF" \
     sysroot="${STAGING_DIR_TARGET}" \
     platform2_root="${WORKDIR}/src/platform2" \
     target_cpu="${@gn_target_arch_name(d)}" \
@@ -81,13 +83,14 @@ GN_ARGS += ' \
 '
 
 chromeos_gn_do_configure() {
-        cd ${S}
-        gn gen --root='${WORKDIR}/src/platform2' --args='${GN_ARGS}' "${OUTPUT_DIR}"
-	bbdebug 1 "Valid --args:\n `gn args --root='${WORKDIR}/src/platform2' --list ${OUTPUT_DIR}`"
+    cd ${S}
+    gn gen --root='${WORKDIR}/src/platform2' --args='${GN_ARGS}' "${B}"
+    bbdebug 1 "Valid --args:\n `gn args --root='${WORKDIR}/src/platform2' --list ${B}`"
 }
-do_configure[cleandirs] += "${OUTPUT_DIR}"
+do_configure[cleandirs] += "${B}"
 
 chromeos_gn_do_compile() {
+    [ -z "${CHROMEOS_PN}" ] && bbfatal "Package ${BPN} is missing CHROMEOS_PN variable"
     ninja -C ${B} ${CHROMEOS_PN}:all
 }
 
