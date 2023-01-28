@@ -6,11 +6,13 @@ LIC_FILES_CHKSUM = "file://${CHROMEOS_COMMON_LICENSE_DIR}/BSD-Google;md5=29eff1d
 
 inherit chromeos_gn
 
+CHROMEOS_PN = "bootstat"
+
 SRC_URI += "file://0001-bootstat-bootstat_log-static_cast.patch"
 
 DEPENDS:append = " libbrillo libchrome rootdev"
 
-S = "${WORKDIR}/src/platform2/${BPN}"
+S = "${WORKDIR}/src/platform2/${CHROMEOS_PN}"
 B = "${WORKDIR}/build"
 PR = "r3230"
 
@@ -37,7 +39,7 @@ PACKAGECONFIG[test] = ""
 PACKAGECONFIG[tcmalloc] = ""
 
 
-GN_ARGS += 'platform_subdir="${BPN}"'
+GN_ARGS += 'platform_subdir="${CHROMEOS_PN}"'
 GN_ARGS += ' \
     use={ \
         cros_host=${@bb.utils.contains('PACKAGECONFIG', 'cros_host', 'true', 'false', d)} \
@@ -47,17 +49,11 @@ GN_ARGS += ' \
     } \
 '
 
-do_configure[cleandirs] += "${B}"
-
-do_compile() {
-    ninja -C ${B}
-}
-
 export SO_VERSION="1"
 
 do_install() {
     install -d ${D}${bindir}
-    install -m 0755 ${B}/bootstat ${D}${bindir}
+    install -m 0755 bootstat ${D}${bindir}
 
     install -d ${D}${libdir}
     find ${B}${base_libdir} -type f -name lib*.so | while read f; do
