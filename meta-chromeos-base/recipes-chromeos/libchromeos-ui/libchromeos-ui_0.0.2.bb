@@ -60,7 +60,7 @@ do_install() {
         ln -sf ${fn}.${SO_VERSION} ${D}${libdir}/${fn}
     done
 
-    LIBCHROME_VER=$(cat ${WORKDIR}/src/platform/libchrome/BASE_VER)
+    LIBCHROME_VER=$(cat ${WORKDIR}/src/platform2/libchrome/BASE_VER)
 
     install -d ${D}${libdir}/pkgconfig
     sed -e "s/@BSLOT@/${LIBCHROME_VER}/g" ${S}/libchromeos-ui.pc.in > ${B}/lib/libchromeos-ui.pc
